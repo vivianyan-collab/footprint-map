@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-15T11:17:20.743Z",
-  "totalTrips": 23,
+  "updatedAt": "2026-10-15T11:21:34.622Z",
+  "totalTrips": 21,
   "totalLocations": 21,
   "records": [
     {
@@ -259,7 +259,7 @@
       "memory": "泡温泉放飞心情 ♨️"
     },
     {
-      "tripId": "T26-02",
+      "tripId": "T26-03",
       "year": 2026,
       "month": 2,
       "day": null,
@@ -274,7 +274,7 @@
       "memory": ""
     },
     {
-      "tripId": "T26-03",
+      "tripId": "T26-04",
       "year": 2026,
       "month": 4,
       "day": null,
@@ -334,7 +334,7 @@
       "memory": "香港迪士尼"
     },
     {
-      "tripId": "T26-07",
+      "tripId": "T26-06",
       "year": 2026,
       "month": 6,
       "day": null,
@@ -368,21 +368,6 @@
       "year": 2026,
       "month": 10,
       "day": null,
-      "destination": "富国岛",
-      "cityCode": "PQ_VN",
-      "cityName": "富国岛",
-      "country": "越南",
-      "lng": 103.96,
-      "lat": 10.28,
-      "companions": "田田、雪雪",
-      "hotel": "喜来登 Villa",
-      "memory": "第一次看海 🌊，海边日落超级美 🌅"
-    },
-    {
-      "tripId": "T26-09",
-      "year": 2026,
-      "month": 10,
-      "day": null,
       "destination": "胡志明市",
       "cityCode": "SGN_VN",
       "cityName": "胡志明市",
@@ -391,10 +376,25 @@
       "lat": 10.76,
       "companions": "田田、雪雪",
       "hotel": "嘉佩乐",
-      "memory": "咖啡公寓卡布奇诺 ☕"
+      "memory": "超有艺术气息的酒店+包场游泳池（香蕉片好吃）"
     },
     {
-      "tripId": "T26-10",
+      "tripId": "T26-08",
+      "year": 2026,
+      "month": 10,
+      "day": null,
+      "destination": "富国岛",
+      "cityCode": "PQ_VN",
+      "cityName": "富国岛",
+      "country": "越南",
+      "lng": 103.96,
+      "lat": 10.28,
+      "companions": "田田、雪雪",
+      "hotel": "喜来登 Villa",
+      "memory": "海边的超大游泳池🌊，海边日落超级美 🌅，超美的海边缆车🚠"
+    },
+    {
+      "tripId": "T26-08",
       "year": 2026,
       "month": 10,
       "day": null,
@@ -406,7 +406,7 @@
       "lat": 22.52,
       "companions": "田田、雪雪",
       "hotel": "桔子酒店",
-      "memory": "吃到超棒的乳鸽 🍗"
+      "memory": "去了小榄~小榄人家好吃！日料下一次吃"
     }
   ]
 }
