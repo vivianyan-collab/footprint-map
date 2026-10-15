@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我们的家庭旅行足迹</title>
+  <!-- 引入 ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #FBF7F0;
+      --card-bg: #FFFFFF;
+      --text-main: #4E443D;
+      --primary-gold: #D99A40;
+      --accent-orange: #BB6D4B;
+      --tag-green: #8D9C87;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 16px 20px;
+      text-align: center;
+      background: rgba(251, 247, 240, 0.9);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    h1 { font-size: 1.4rem; font-weight: 600; color: var(--text-main); }
+    p.subtitle { font-size: 0.85rem; color: #8C827A; margin-top: 4px; }
+
+    #map-container {
+      width: 100vw;
+      height: 65vh;
+      min-height: 380px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 8px 16px;
+    }
+
+    button {
+      background: var(--card-bg);
+      border: 1px solid #E2D9CC;
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    /* 抽屉详情卡片 */
+    #detail-card {
+      position: fixed;
+      bottom: -100%;
+      left: 0; right: 0;
+      background: var(--card-bg);
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+      transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+      z-index: 200;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    #detail-card.active { bottom: 0; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .card-title { font-size: 1.2rem; font-weight: bold; color: var(--accent-orange); }
+    .close-btn { font-size: 1.2rem; cursor: pointer; color: #AAA; border: none; background: none; }
+    .card-item { margin-bottom: 8px; font-size: 0.9rem; line-height: 1.5; }
+    .tag { display: inline-block; background: #F3EFE6; color: var(--text-main); padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; margin-right: 6px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>把一起走过的地方，慢慢点亮 ✨</h1>
+    <p class="subtitle" id="stats-info">正在加载足迹地图...</p>
+  </header>
+
+  <div class="controls">
+    <button onclick="replayAnimation()">🔄 重播足迹</button>
+  </div>
+
+  <div id="map-container"></div>
+
+  <!-- 详情抽屉卡片 -->
+  <div id="detail-card">
+    <div class="card-header">
+      <div class="card-title" id="card-location">目的地</div>
+      <button class="close-btn" onclick="closeCard()">✕</button>
+    </div>
+    <div class="card-item" id="card-time">📅 时间：-</div>
+    <div class="card-item" id="card-companions">👥 同行：-</div>
+    <div class="card-item" id="card-hotel">🏨 住宿：-</div>
+    <div class="card-item" id="card-memory">📝 回忆：-</div>
+  </div>
+
+  <script>
+    let myChart = echarts.init(document.getElementById('map-container'));
+    let footprintsData = [];
+
+    // 初始化加载数据
+    async function init() {
+      try {
+        const res = await fetch('./src/data/footprints.json');
+        const data = await res.json();
+        footprintsData = data.records;
+        
+        document.getElementById('stats-info').innerText = 
+          `积累了 ${data.totalTrips} 次出行 · 点亮 ${data.totalLocations} 个目的地`;
+
+        renderMap();
+      } catch (e) {
+        document.getElementById('stats-info').innerText = '数据加载中或暂无记录';
+      }
+    }
+
+    function renderMap() {
+      // 构建 ECharts 散点数据
+      const scatterData = footprintsData.map(item => ({
+        name: item.cityName,
+        value: [item.lng, item.lat, 1],
+        rawData: item
+      }));
+
+      const option = {
+        backgroundColor: '#FBF7F0',
+        geo: {
+          map: 'world', // 采用内置/外部 GeoJSON
+          roam: true,
+          zoom: 3.5,
+          center: [110.0, 18.0], // 默认以中国南部和东南亚为视野中心
+          itemStyle: {
+            areaColor: '#E9E1D3',
+            borderColor: '#FAF6EE',
+            borderWidth: 1
+          },
+          emphasis: {
+            itemStyle: { areaColor: '#DFD5C3' }
+          }
+        },
+        series: [{
+          type: 'effectScatter',
+          coordinateSystem: 'geo',
+          data: scatterData,
+          symbolSize: 12,
+          showEffectOn: 'render',
+          rippleEffect: { brushType: 'stroke', scale: 3 },
+          itemStyle: {
+            color: '#D99A40',
+            shadowBlur: 10,
+            shadowColor: '#D99A40'
+          }
+        }]
+      };
+
+      myChart.setOption(option);
+
+      // 点击光点查看详情
+      myChart.on('click', function(params) {
+        if (params.data && params.data.rawData) {
+          showCard(params.data.rawData);
+        }
+      });
+    }
+
+    function showCard(info) {
+      document.getElementById('card-location').innerText = `${info.year}年${info.month}月 · ${info.destination}`;
+      document.getElementById('card-time').innerText = `📅 时间：${info.year}年${info.month}月${info.day ? info.day + '日' : ''}`;
+      document.getElementById('card-companions').innerText = `👥 同行：${info.companions || '家人同行，待补充'}`;
+      document.getElementById('card-hotel').innerText = `🏨 住宿：${info.hotel || '无标注'}`;
+      document.getElementById('card-memory').innerText = `📝 回忆：${info.memory || '暂无文字记录'}`;
+      document.getElementById('detail-card').classList.add('active');
+    }
+
+    function closeCard() {
+      document.getElementById('detail-card').classList.remove('active');
+    }
+
+    function replayAnimation() {
+      closeCard();
+      renderMap();
+    }
+
+    window.onload = init;
+    window.onresize = () => myChart.resize();
+  </script>
+</body>
+</html>
