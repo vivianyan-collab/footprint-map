@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>我们的家庭旅行足迹</title>
-  <!-- 引入 ECharts -->
+  <!-- 引入 ECharts 与 世界地图 GeoJSON 数据 -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
   <style>
     :root {
       --bg-color: #FBF7F0;
@@ -13,7 +14,6 @@
       --text-main: #4E443D;
       --primary-gold: #D99A40;
       --accent-orange: #BB6D4B;
-      --tag-green: #8D9C87;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +61,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
 
-    /* 抽屉详情卡片 */
+    /* 抽屉卡片 */
     #detail-card {
       position: fixed;
       bottom: -100%;
@@ -81,14 +81,13 @@
     .card-title { font-size: 1.2rem; font-weight: bold; color: var(--accent-orange); }
     .close-btn { font-size: 1.2rem; cursor: pointer; color: #AAA; border: none; background: none; }
     .card-item { margin-bottom: 8px; font-size: 0.9rem; line-height: 1.5; }
-    .tag { display: inline-block; background: #F3EFE6; color: var(--text-main); padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; margin-right: 6px; }
   </style>
 </head>
 <body>
 
   <header>
     <h1>把一起走过的地方，慢慢点亮 ✨</h1>
-    <p class="subtitle" id="stats-info">正在加载足迹地图...</p>
+    <p class="subtitle" id="stats-info">地图准备中...</p>
   </header>
 
   <div class="controls">
@@ -113,26 +112,41 @@
     let myChart = echarts.init(document.getElementById('map-container'));
     let footprintsData = [];
 
-    // 初始化加载数据
-    async function init() {
-      try {
-        const res = await fetch('./src/data/footprints.json');
-        const data = await res.json();
-        footprintsData = data.records;
-        
-        document.getElementById('stats-info').innerText = 
-          `积累了 ${data.totalTrips} 次出行 · 点亮 ${data.totalLocations} 个目的地`;
+    // 默认示例渲染数据（防止文件未载入时显示一片空白）
+    const demoData = {
+      totalTrips: 1,
+      totalLocations: 1,
+      records: [
+        { tripId: 'DEMO', year: 2026, month: 10, destination: '示例光点', cityName: '示例位置', lng: 113.26, lat: 23.13, companions: '全家', memory: '欢迎体验足迹地图 ✨' }
+      ]
+    };
 
-        renderMap();
+    async function init() {
+      renderMap(demoData.records);
+      document.getElementById('stats-info').innerText = '正在同步 Google Sheets 最新数据...';
+
+      try {
+        const res = await fetch('./src/data/footprints.json?v=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.records && data.records.length > 0) {
+            footprintsData = data.records;
+            document.getElementById('stats-info').innerText = 
+              `积累了 ${data.totalTrips || footprintsData.length} 次出行 · 点亮 ${data.totalLocations || footprintsData.length} 个目的地`;
+            renderMap(footprintsData);
+            return;
+          }
+        }
       } catch (e) {
-        document.getElementById('stats-info').innerText = '数据加载中或暂无记录';
+        console.log("正在使用初始地图环境");
       }
+
+      document.getElementById('stats-info').innerText = '请在 Google Sheets 表格中点击【发布地图】添加你的第一条足迹！';
     }
 
-    function renderMap() {
-      // 构建 ECharts 散点数据
-      const scatterData = footprintsData.map(item => ({
-        name: item.cityName,
+    function renderMap(records) {
+      const scatterData = records.map(item => ({
+        name: item.cityName || item.destination,
         value: [item.lng, item.lat, 1],
         rawData: item
       }));
@@ -140,10 +154,10 @@
       const option = {
         backgroundColor: '#FBF7F0',
         geo: {
-          map: 'world', // 采用内置/外部 GeoJSON
+          map: 'world',
           roam: true,
-          zoom: 3.5,
-          center: [110.0, 18.0], // 默认以中国南部和东南亚为视野中心
+          zoom: 4,
+          center: [112.0, 18.0],
           itemStyle: {
             areaColor: '#E9E1D3',
             borderColor: '#FAF6EE',
@@ -157,7 +171,7 @@
           type: 'effectScatter',
           coordinateSystem: 'geo',
           data: scatterData,
-          symbolSize: 12,
+          symbolSize: 14,
           showEffectOn: 'render',
           rippleEffect: { brushType: 'stroke', scale: 3 },
           itemStyle: {
@@ -168,9 +182,8 @@
         }]
       };
 
-      myChart.setOption(option);
+      myChart.setOption(option, true);
 
-      // 点击光点查看详情
       myChart.on('click', function(params) {
         if (params.data && params.data.rawData) {
           showCard(params.data.rawData);
@@ -193,7 +206,7 @@
 
     function replayAnimation() {
       closeCard();
-      renderMap();
+      renderMap(footprintsData.length > 0 ? footprintsData : demoData.records);
     }
 
     window.onload = init;
