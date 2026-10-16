@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-15T11:21:34.622Z",
+  "updatedAt": "2026-10-16T07:46:47.148Z",
   "totalTrips": 21,
   "totalLocations": 21,
   "records": [
@@ -12,8 +12,8 @@
       "cityCode": "GY_CN",
       "cityName": "贵阳",
       "country": "中国",
-      "lng": 106.7,
-      "lat": 126.57,
+      "lng": 106.71,
+      "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
       "memory": ""
@@ -117,8 +117,8 @@
       "cityCode": "GY_CN",
       "cityName": "贵阳",
       "country": "中国",
-      "lng": 106.7,
-      "lat": 126.57,
+      "lng": 106.71,
+      "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
       "memory": ""
@@ -192,8 +192,8 @@
       "cityCode": "GY_CN",
       "cityName": "贵阳",
       "country": "中国",
-      "lng": 106.7,
-      "lat": 126.57,
+      "lng": 106.71,
+      "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
       "memory": ""
@@ -267,8 +267,8 @@
       "cityCode": "GY_CN",
       "cityName": "贵阳",
       "country": "中国",
-      "lng": 106.7,
-      "lat": 126.57,
+      "lng": 106.71,
+      "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
       "memory": ""
@@ -357,8 +357,8 @@
       "cityCode": "GY_CN",
       "cityName": "贵阳",
       "country": "中国",
-      "lng": 106.7,
-      "lat": 126.57,
+      "lng": 106.71,
+      "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
       "memory": ""
