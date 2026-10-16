@@ -9,9 +9,8 @@
 <meta name="theme-color" content="#FFF4E4">
 <title>我们的家庭旅行足迹</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%97%BA%EF%B8%8F%3C/text%3E%3C/svg%3E">
-<link rel="preload" href="./src/fonts/ZCOOLKuaiLe-subset.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-@font-face{font-family:"KuaiLe";src:url("./src/fonts/ZCOOLKuaiLe-subset.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"KuaiLe";src:url("./src/fonts/ZCOOLKuaiLe-subset.woff2") format("woff2"),url("./src/ZCOOLKuaiLe-subset.woff2") format("woff2");font-display:swap}
 :root{
   --bg:#FFF8EE; --paper:#FFFDF8;
   --ink:#4E443D; --soft:#8C827A; --line:#EADFCB;
@@ -89,8 +88,8 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
 }
 .map-hint.off{opacity:0}
 .year-tick{
-  position:absolute;left:16px;top:10px;z-index:3;font-family:var(--kl);font-size:clamp(24px,5vw,34px);color:rgba(110,62,8,.75);
-  pointer-events:none;display:none;text-shadow:0 2px 0 rgba(255,255,255,.7)
+  position:absolute;left:12px;top:12px;z-index:3;font-family:var(--kl);font-size:15px;color:#7A4A12;background:rgba(255,253,248,.92);border:1px solid #E7DCCB;padding:5px 14px;border-radius:999px;
+  pointer-events:none;display:none
 }
 .year-tick.on{display:block}
 .map-msg{
@@ -197,11 +196,10 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
 <body>
 <div class="page">
   <header class="hero">
-    <span class="doodle d1" aria-hidden="true">✈️</span><span class="doodle d2" aria-hidden="true">🌴</span>
-    <span class="doodle d3" aria-hidden="true">✨</span><span class="doodle d4" aria-hidden="true">🐚</span>
+    
     <p class="eyebrow">Our Family Footprints</p>
     <h1>我们的<span class="mark">家庭旅行足迹</span></h1>
-    <p class="sub">把一起走过的地方，慢慢点亮 ✨</p>
+    <p class="sub">把一起走过的地方，慢慢点亮</p>
     <div class="stats" id="stats">
       <div class="stat"><b id="stTrips">0</b><span>次出发</span></div>
       <div class="stat"><b id="stPlaces">0</b><span>个目的地</span></div>
