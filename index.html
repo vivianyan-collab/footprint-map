@@ -10,7 +10,7 @@
 <title>我们的家庭旅行足迹</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%97%BA%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <style>
-@font-face{font-family:"KuaiLe";src:url("./src/fonts/ZCOOLKuaiLe-subset.woff2") format("woff2"),url("./src/ZCOOLKuaiLe-subset.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"KuaiLe";src:url("./src/fonts/ZCOOLKuaiLe-subset.woff2?v=2") format("woff2"),url("./src/ZCOOLKuaiLe-subset.woff2?v=2") format("woff2");font-display:swap}
 :root{
   --bg:#FFF8EE; --paper:#FFFDF8;
   --ink:#4E443D; --soft:#8C827A; --line:#EADFCB;
@@ -202,6 +202,53 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
   .panel{position:sticky;top:12px;height:var(--map-h);overflow-y:auto;overscroll-behavior:contain;padding:0 6px 24px 2px;scrollbar-width:thin;scrollbar-color:#E4D3B6 transparent}
   .panel-head{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 78%,rgba(255,248,238,0));padding-top:2px}
 }
+
+/* ---------- 标签页 / 那年今日 ---------- */
+.tabs{display:flex;justify-content:center;gap:6px;margin:14px auto 4px}
+.tab{border:1.5px solid var(--line);background:rgba(255,253,248,.85);border-radius:999px;padding:5px 20px;font-family:var(--kl);font-size:16px;color:#7A6656}
+.tab.on{background:#E4573D;border-color:#E4573D;color:#fff;box-shadow:0 4px 12px rgba(228,87,61,.28)}
+.memlane{display:none;margin:8px auto 2px;max-width:560px;text-align:center}
+.memlane.on{display:block}
+.memlane button{border:1.5px dashed #E4C9A0;background:rgba(255,248,232,.9);border-radius:999px;padding:6px 18px;font-family:var(--kl);font-size:15px;color:#7A5A38}
+.memlane button:hover{background:#FFF1D6}
+.memlane b{font-weight:400;color:#E4573D}
+[hidden]{display:none!important}
+/* ---------- 印章 ---------- */
+.stamp{display:block;mix-blend-mode:multiply}
+.d-stamp{position:absolute;right:12px;top:58px;pointer-events:none;animation:thump .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes thump{0%{transform:scale(1.7);opacity:0}60%{opacity:1}100%{transform:scale(1);opacity:1}}
+.d-title.hasst,.d-who.hasst{padding-right:112px}
+.d-edit{display:inline-block;margin-top:10px;font-size:13px;color:#8C6A4A;border:1.5px solid var(--line);border-radius:999px;padding:2px 12px;text-decoration:none;background:#fff}
+.d-edit:hover{background:var(--tcbg)}
+/* ---------- 年度回顾 ---------- */
+.review{max-width:980px;margin:6px auto 0;padding-bottom:24px}
+.rv-title{font-family:var(--kl);font-weight:400;font-size:26px;text-align:center;margin:10px 0 2px;color:#5A4036}
+.rv-sub{text-align:center;color:var(--soft);font-size:13.5px;margin-bottom:12px}
+.bars{background:rgba(255,253,248,.92);border:1.5px solid #EBDDC6;border-radius:22px;padding:22px 18px 10px;margin-bottom:16px;overflow-x:auto}
+.bars-in{display:flex;gap:clamp(14px,3vw,34px);align-items:flex-end;min-width:min-content;justify-content:center}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.bpair{display:flex;gap:5px;align-items:flex-end;height:96px}
+.bar1{width:22px;border-radius:7px 7px 3px 3px;position:relative;min-height:3px}
+.bar1 em{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-style:normal;font-family:var(--kl);font-size:13px;color:#6B5A4C}
+.bar1.a{background:#E88A6E}.bar1.b{background:#6DB7B2}
+.bcol span{font-family:var(--kl);font-size:15px}
+.bleg{display:flex;justify-content:center;gap:16px;font-size:12.5px;color:var(--soft);margin-top:6px}
+.bleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.ypage{background:rgba(255,253,248,.94);border:1.5px solid #EBDDC6;border-radius:24px;padding:16px 20px 18px;margin-bottom:18px;box-shadow:0 8px 22px rgba(120,80,40,.08)}
+.yp-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px dashed #EBDDC6;padding-bottom:8px;margin-bottom:10px}
+.yp-head b{font-family:var(--kl);font-weight:400;font-size:36px;line-height:1.1;color:#5A4036}
+.yp-m{display:flex;flex-wrap:wrap;gap:6px 22px;margin-bottom:10px}
+.ym{min-width:70px}
+.ym b{display:block;font-family:var(--kl);font-weight:400;font-size:26px;line-height:1.15}
+.ym:nth-child(1) b{color:#E4573D}.ym:nth-child(2) b{color:#E2992E}.ym:nth-child(3) b{color:#3E9C97}.ym:nth-child(4) b{color:#D9648A;font-size:20px;padding-top:4px}
+.ym span{font-size:12px;color:var(--soft)}
+.dl{font-style:normal;font-size:11.5px;margin-left:5px;font-family:var(--sans)}
+.dl.up{color:#3E9C97}.dl.dn{color:#D9704F}.dl.eq{color:var(--soft)}
+.yp-body{display:grid;grid-template-columns:1fr;gap:12px}
+.yp-stamps{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;align-content:flex-start}
+.yp-map{width:100%;border-radius:16px;display:block;background:#D9EDF3}
+@media (min-width:760px){.yp-body{grid-template-columns:1.1fr 1fr;align-items:start}}
+@media (max-width:420px){.d-title.hasst,.d-who.hasst{padding-right:84px}.d-stamp svg{width:84px;height:84px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -218,9 +265,11 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
       <div class="stat"><b id="stRegions">0</b><span>个省份/国家</span></div>
       <div class="stat"><b id="yearSpan">0</b><span>年的足迹</span></div>
     </div>
+    <nav class="tabs" id="tabs" aria-label="页面切换"><button class="tab on" data-v="map">足迹地图</button><button class="tab" data-v="review">年度回顾</button></nav>
+    <div class="memlane" id="memlane"><button id="memBtn"></button></div>
   </header>
 
-  <main class="layout">
+  <main class="layout" id="viewMap">
     <section class="map-card" id="mapCard" aria-label="足迹地图">
       <div id="map"></div>
       <div class="map-caption" id="caption"><span class="dot"></span><span class="t" id="captionText"></span><button id="captionClose" aria-label="取消选择">✕</button></div>
@@ -260,7 +309,17 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
       <p class="foot" id="foot"></p>
     </aside>
   </main>
+  <section class="review" id="viewReview" hidden aria-label="年度回顾"></section>
 </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
+    <feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="3" result="w"/>
+    <feDisplacementMap in="SourceGraphic" in2="w" scale="2.6" result="d"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="8" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  14 0 0 0 -3.6" result="m"/>
+    <feComposite in="d" in2="m" operator="in"/>
+  </filter>
+</defs></svg>
 
 <script src="./src/vendor/echarts.min.js"></script>
 <script>
@@ -280,6 +339,10 @@ const clean = v => { if (v == null) return ''; const s = String(v).trim(); retur
 const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
 const isDesktop = () => window.matchMedia('(min-width:960px)').matches;
+let EDIT = false;
+try { const q = new URLSearchParams(location.search); if (q.has('edit')) localStorage.setItem('fp_edit', q.get('edit') === '0' ? '0' : '1'); EDIT = localStorage.getItem('fp_edit') === '1'; } catch (e) {}
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 
 /* ============ 时间配色：越近越鲜艳（珊瑚红），越久越青绿 ============ */
 const RAMP = [[0,[228,87,61]],[.3,[233,162,59]],[.62,[170,174,112]],[1,[79,163,160]]];
@@ -358,6 +421,15 @@ function validCoord(r){
   const x = Number(r.lng), y = Number(r.lat);
   return isFinite(x) && isFinite(y) && Math.abs(x) <= 180 && Math.abs(y) <= 90 && !(x === 0 && y === 0);
 }
+function buildHistory(){
+  const visits = new Map(), firstYear = new Map();
+  S.all.trips.slice().reverse().forEach(t => {                         // 从最早到最近
+    const seen = new Set();
+    stopsOf(t).forEach(p => { if (seen.has(p.key)) return; seen.add(p.key); if (!visits.has(p.key)) { visits.set(p.key, []); firstYear.set(p.key, t.year); } visits.get(p.key).push(t.id); });
+  });
+  S.hist = {visits, firstYear};
+}
+const ordinalOf = (tid, key) => (S.hist.visits.get(key) || []).indexOf(tid) + 1;
 function buildModel(records, year){
   const recs = records.filter(r => year === 'all' || Number(r.year) === year);
   const tripMap = new Map(), dotMap = new Map(), years = new Set();
@@ -371,7 +443,7 @@ function buildModel(records, year){
     let t = tripMap.get(id);
     if (!t) { t = {id, year:Number(r.year), month:Number(r.month), day:r.day ? Number(r.day) : null, places:[], who:[], regions:new Set()}; tripMap.set(id, t); }
     const region = regionOfPoint(lng, lat);
-    t.places.push({name, city, lng, lat, key, region, hotel:clean(r.hotel), memory:clean(r.memory)});
+    t.places.push({name, city, lng, lat, key, region, row:Number(r.row) || 0, hotel:clean(r.hotel), memory:clean(r.memory)});
     if (region) t.regions.add(region);
     clean(r.companions).split(/[、,，;；\/\s]+/).filter(Boolean).forEach(w => { if (!t.who.includes(w)) t.who.push(w); });
     years.add(Number(r.year));
@@ -621,8 +693,14 @@ function renderDetail(t){
     '<button data-act="older" title="更早的一次" aria-label="更早的一次"' + (i >= trips.length - 1 ? ' disabled' : '') + '>‹</button>' +
     '<button data-act="newer" title="更近的一次" aria-label="更近的一次"' + (i <= 0 ? ' disabled' : '') + '>›</button>' +
     '<button data-act="close" title="关闭" aria-label="关闭">✕</button></div></div>' +
-    '<h3 class="d-title">' + esc(tripTitle(t)) + '</h3>' + who + chips + (blocks || '<p class="d-empty">这次的小故事还没写下来，等你补上</p>');
+    '<div class="d-stamp">' + stampSVG(t, multi ? 90 : 98) + '</div>' +
+    '<h3 class="d-title hasst">' + esc(tripTitle(t)) + '</h3>' + (who ? who.replace('class="d-who"', 'class="d-who hasst"') : '') + chips + (blocks || '<p class="d-empty">这次的小故事还没写下来，等你补上</p>') + editLink(t);
   box.hidden = false;
+}
+function editLink(t){
+  if (!EDIT || !S.sheetUrl) return '';
+  const row = (t.places.find(p => p.row) || {}).row; if (!row) return '';
+  return '<div><a class="d-edit" target="_blank" rel="noopener" href="' + esc(S.sheetUrl) + '&range=A' + row + '">在表格里编辑</a></div>';
 }
 function renderCity(d){
   const box = $('detail'), M = S.model;
@@ -752,8 +830,128 @@ function setYear(y){
   renderYears(); renderSummary(); renderTimeline();
   if (isDesktop()) $('panel').scrollTo({top:0});
   else { const top = $('panel').getBoundingClientRect().top + window.scrollY - ($('mapCard').offsetHeight + 16); if (window.scrollY > top) window.scrollTo({top:Math.max(0, top), behavior: REDUCE ? 'auto' : 'smooth'}); }
-  if (!REDUCE && S.model.trips.length >= 2) { replay(y === 'all' ? 5000 : 2200); }
-  else { chart.setOption({geo:{regions: buildRegions(S.curCounts)}}); render(); fitAll(900); }
+  chart.setOption({geo:{regions: buildRegions(S.curCounts)}}); render(); fitAll(900);
+}
+
+
+/* ============ 旅行印章：每次旅行自动生成，颜色跟着时间走 ============ */
+let stampN = 0;
+function stampSVG(t, px){
+  const id = 'st' + (++stampN), col = t.color, st = stopsOf(t);
+  let h = 0; for (const ch of t.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const rot = (h % 19) - 9, ym = t.year + ' · ' + String(t.month).padStart(2, '0');
+  const T = (x, y, fs, txt, extra) => '<text x="' + x + '" y="' + y + '" font-family="KuaiLe,sans-serif" font-size="' + fs + '" text-anchor="middle" ' + (extra || '') + '>' + esc(txt) + '</text>';
+  let body, w = 150, hgt = 150;
+  if (st.length === 1) {
+    const p = st[0], n = ordinalOf(t.id, p.key), name = Array.from(p.name || p.city || '');
+    const top = n === 1 ? 'NEW' : n > 1 ? '第 ' + n + ' 次' : 'FOOTPRINT';
+    let nm;
+    if (name.length <= 2) nm = T(75, 75 + 32 * .35, 32, name.join(''));
+    else if (name.length === 3) nm = T(75, 75 + 28 * .35, 28, name.join(''));
+    else if (name.length === 4) nm = T(75, 75 + 22 * .35, 22, name.join(''));
+    else { const k = Math.ceil(name.length / 2), fs = k <= 3 ? 21 : 17, a = name.slice(0, k).join(''), b = name.slice(k).join(''); nm = T(75, 75 - fs * .15, fs, a) + T(75, 75 + fs * .95, fs, b); }
+    body = '<defs><path id="' + id + 't" d="M 25 75 A 50 50 0 0 1 125 75"/><path id="' + id + 'b" d="M 19 75 A 56 56 0 0 0 131 75"/></defs>' +
+      '<g filter="url(#ink)" fill="none" stroke="' + col + '" stroke-width="3"><circle cx="75" cy="75" r="68"/><circle cx="75" cy="75" r="61" stroke-width="1.3"/>' +
+      '<g fill="' + col + '" stroke="none"><text font-family="KuaiLe,sans-serif" font-size="' + (n >= 1 ? 14 : 12) + '" letter-spacing="3" text-anchor="middle"><textPath href="#' + id + 't" startOffset="50%">' + esc(top) + '</textPath></text>' +
+      '<text font-family="KuaiLe,sans-serif" font-size="14" letter-spacing="2" text-anchor="middle"><textPath href="#' + id + 'b" startOffset="50%" side="right">' + ym + '</textPath></text>' + nm + '</g>' +
+      '<path d="M44 51h62M44 101h62" stroke-width="1.2"/></g>';
+  } else {
+    w = 190; hgt = 120;
+    const first = st[0].name || st[0].city, last = st[st.length - 1].name || st[st.length - 1].city;
+    const isNew = st.some(p => ordinalOf(t.id, p.key) === 1);
+    const fit = nm => Array.from(nm).length > 4 ? 17 : 22;
+    body = '<g filter="url(#ink)" fill="none" stroke="' + col + '" stroke-width="3"><rect x="6" y="6" width="178" height="108" rx="16"/><rect x="13" y="13" width="164" height="94" rx="11" stroke-width="1.3"/>' +
+      '<g fill="' + col + '" stroke="none">' + T(95, 42, fit(first), first + ' →') + T(95, 68, fit(last), last) + T(95, 97, 14, ym + ' · ' + st.length + ' 站', 'letter-spacing="1.5"') +
+      (isNew ? T(150, 30, 11, 'NEW', 'letter-spacing="1"') : '') + '</g><path d="M38 76h114" stroke-width="1.2"/></g>';
+  }
+  return '<svg class="stamp" width="' + Math.round(px * w / 150) + '" height="' + Math.round(px * hgt / 150) + '" viewBox="0 0 ' + w + ' ' + hgt + '" style="transform:rotate(' + rot + 'deg)" role="img" aria-label="' + esc(tripTitle(t)) + ' ' + t.year + '年' + t.month + '月的印章">' + body + '</svg>';
+}
+
+/* ============ 年度回顾 ============ */
+function reviewRows(){
+  const byY = new Map();
+  S.all.trips.slice().reverse().forEach(t => { if (!byY.has(t.year)) byY.set(t.year, []); byY.get(t.year).push(t); });
+  return [...byY.keys()].sort((a, b) => a - b).map(y => {
+    const ts = byY.get(y), keys = new Set(), cnt = new Map();
+    ts.forEach(t => { const seen = new Set(); stopsOf(t).forEach(p => { keys.add(p.key); if (!seen.has(p.key)) { seen.add(p.key); cnt.set(p.key, (cnt.get(p.key) || 0) + 1); } }); });
+    let fav = null, fc = 0; cnt.forEach((c, k) => { if (c > fc) { fc = c; fav = k; } });
+    return {y, trips: ts, n: ts.length, cities: keys.size, nw: [...keys].filter(k => S.hist.firstYear.get(k) === y).length,
+      fav: fc >= 2 ? {name: S.all.dotMap.get(fav).name, c: fc} : null};
+  });
+}
+const delta = (cur, prev) => prev == null ? '' : cur > prev ? '<i class="dl up">▲ ' + (cur - prev) + '</i>' : cur < prev ? '<i class="dl dn">▼ ' + (prev - cur) + '</i>' : '<i class="dl eq">持平</i>';
+function miniBounds(){
+  const d = S.all.dots; let x0 = 100, x1 = 118, y0 = 18, y1 = 32;
+  if (d.length) { const xs = d.map(p => p.lng), ys = d.map(p => p.lat); x0 = Math.min.apply(null, xs); x1 = Math.max.apply(null, xs); y0 = Math.min.apply(null, ys); y1 = Math.max.apply(null, ys); }
+  x0 -= 3; x1 += 3; y0 -= 3; y1 += 3;
+  const cy = (y0 + y1) / 2, k = Math.cos(cy * Math.PI / 180);
+  let w = (x1 - x0) * k, h = y1 - y0; const A = 1.3;
+  if (w / h < A) { const nw = h * A / k, c = (x0 + x1) / 2; x0 = c - nw / 2; x1 = c + nw / 2; } else { const nh = w / A, c = (y0 + y1) / 2; y0 = c - nh / 2; y1 = c + nh / 2; }
+  return {x0, x1, y0, y1, k};
+}
+function drawMini(cv, row, B){
+  const W = cv.clientWidth || 360, H = Math.round(W * (B.y1 - B.y0) / ((B.x1 - B.x0) * B.k)), dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px';
+  const g = cv.getContext('2d'); g.scale(dpr, dpr);
+  const X = lng => (lng - B.x0) / (B.x1 - B.x0) * W, Y = lat => (B.y1 - lat) / (B.y1 - B.y0) * H;
+  g.fillStyle = '#D9EDF3'; g.fillRect(0, 0, W, H);
+  const regs = new Set(); row.trips.forEach(t => t.regions.forEach(r => regs.add(r)));
+  S.geo.features.forEach((f, i) => {
+    const bb = S.feat[i].bbox; if (bb[1] < B.x0 || bb[0] > B.x1 || bb[3] < B.y0 || bb[2] > B.y1) return;
+    const nm = ALIAS[f.properties.name] || f.properties.name, hit = regs.has(nm);
+    g.beginPath();
+    S.feat[i].polys.forEach(poly => poly.forEach(ring => ring.forEach((pt, j) => j ? g.lineTo(X(pt[0]), Y(pt[1])) : g.moveTo(X(pt[0]), Y(pt[1])))));
+    g.fillStyle = hit ? '#F7C97C' : C.land; g.fill('evenodd'); g.lineWidth = .8; g.strokeStyle = '#FFF8EE'; g.stroke();
+  });
+  row.trips.forEach(t => stopsOf(t).forEach(p => {
+    g.beginPath(); g.arc(X(p.lng), Y(p.lat), 5, 0, 7); g.fillStyle = t.color; g.fill(); g.lineWidth = 2; g.strokeStyle = '#FFFDF8'; g.stroke();
+  }));
+}
+function renderReview(){
+  const box = $('viewReview'), rows = reviewRows();
+  if (!rows.length) { box.innerHTML = '<p class="rv-sub" style="padding:40px 0">还没有记录，等第一段旅程来点亮</p>'; return; }
+  const mx = Math.max.apply(null, rows.map(r => Math.max(r.n, r.nw, 1)));
+  const bars = rows.map(r => '<div class="bcol"><div class="bpair"><div class="bar1 a" style="height:' + Math.max(3, r.n / mx * 84) + 'px"><em>' + r.n + '</em></div><div class="bar1 b" style="height:' + Math.max(3, r.nw / mx * 84) + 'px"><em>' + r.nw + '</em></div></div><span>' + r.y + '</span></div>').join('');
+  const pages = rows.slice().reverse().map(r => {
+    const prev = rows.find(q => q.y === r.y - 1);
+    const stamps = r.trips.map(t => stampSVG(t, 104)).join('');
+    return '<article class="ypage" data-y="' + r.y + '"><div class="yp-head"><b>' + r.y + '</b></div><div class="yp-m">' +
+      '<div class="ym"><b>' + r.n + delta(r.n, prev && prev.n) + '</b><span>次出发</span></div>' +
+      '<div class="ym"><b>' + r.cities + delta(r.cities, prev && prev.cities) + '</b><span>个城市</span></div>' +
+      '<div class="ym"><b>' + r.nw + delta(r.nw, prev && prev.nw) + '</b><span>个新点亮</span></div>' +
+      (r.fav ? '<div class="ym"><b>' + esc(r.fav.name) + '</b><span>最爱 · 去了 ' + r.fav.c + ' 次</span></div>' : '') +
+      '</div><div class="yp-body"><div class="yp-stamps">' + stamps + '</div><canvas class="yp-map"></canvas></div></article>';
+  }).join('');
+  box.innerHTML = '<h2 class="rv-title">年度回顾</h2><p class="rv-sub">每一年一页，盖满这一年的印章</p>' +
+    '<div class="bars"><div class="bars-in">' + bars + '</div><div class="bleg"><span><i style="background:#E88A6E"></i>出发次数</span><span><i style="background:#6DB7B2"></i>新点亮的城市</span></div></div>' + pages;
+  drawReviewMaps();
+}
+function drawReviewMaps(){
+  if ($('viewReview').hidden || !S.geo) return;
+  const rows = reviewRows(), B = miniBounds();
+  document.querySelectorAll('.ypage').forEach(pg => { const row = rows.find(r => r.y === Number(pg.dataset.y)); if (row) drawMini(pg.querySelector('canvas'), row, B); });
+}
+
+/* ============ 两个页面 + 那年今日 ============ */
+function showView(v){
+  const rv = v === 'review';
+  $('viewMap').hidden = rv; $('viewReview').hidden = !rv;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (rv) { if (!$('viewReview').dataset.ready) { renderReview(); $('viewReview').dataset.ready = '1'; } else drawReviewMaps(); window.scrollTo({top:0}); }
+  else if (chart) { chart.resize(); render(); }
+}
+function fitMapHeight(){
+  if (!isDesktop()) { document.documentElement.style.removeProperty('--map-h'); return; }
+  const hb = document.querySelector('.hero').getBoundingClientRect().bottom + window.scrollY;
+  document.documentElement.style.setProperty('--map-h', Math.round(Math.min(800, Math.max(520, window.innerHeight - hb - 28))) + 'px');
+}
+function setupMemlane(){
+  const m = NOW.getMonth() + 1, y = NOW.getFullYear();
+  const cand = S.all.trips.filter(t => t.month === m && t.year < y).sort((a, b) => b.year - a.year)[0];   // 同月、更早的年份里，最近的一次
+  if (!cand) return;
+  $('memBtn').innerHTML = (y - cand.year) + ' 年前的' + m + '月，你们在 <b>' + esc(tripTitle(cand)) + '</b> ›';
+  $('memlane').classList.add('on'); fitMapHeight();
+  $('memBtn').onclick = () => { showView('map'); if (S.year !== 'all') setYear('all'); selectTrip(cand.id); };
 }
 
 /* ============ 启动 ============ */
@@ -763,7 +961,11 @@ function start(geo, data){
   S.records = (data && data.records) || [];
   S.win = computeWindow(S.records);
   S.all = buildModel(S.records, 'all'); S.model = S.all; S.curCounts = S.model.regionCounts;
-  const autoplay = !REDUCE && S.model.trips.length >= 2;
+  S.sheetUrl = (data && data.sheetUrl) || '';
+  buildHistory();
+  const fp = S.records.length + '|' + S.records.reduce((m, r) => Math.max(m, Number(r.year) * 100 + Number(r.month)), 0) + '|' + ((data && data.updatedAt) ? '' : 'x');
+  const fresh = lsGet('fp_seen') !== fp; lsSet('fp_seen', fp);
+  const autoplay = !REDUCE && S.model.trips.length >= 2 && fresh;
   if (autoplay) prepareAnim(6500);
 
   chart.setOption({
@@ -782,7 +984,10 @@ function start(geo, data){
   });
   const first = fitTo(allPoints()); setView(first.center, first.zoom); afterMove(); render();
 
-  renderStats(); renderYears(); renderSummary(); renderTimeline(); renderLegend();
+  renderStats(); renderYears(); renderSummary(); renderTimeline(); renderLegend(); setupMemlane();
+  $('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showView(b.dataset.v); });
+  fitMapHeight();
+  let rvT = 0; window.addEventListener('resize', () => { fitMapHeight(); clearTimeout(rvT); rvT = setTimeout(drawReviewMaps, 200); });
   if (data && data.updatedAt) { const d = new Date(data.updatedAt); if (!isNaN(d)) $('foot').textContent = '足迹最近更新于 ' + d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日'; }
   const bad = S.records.filter(r => !validCoord(r)).map(r => r.destination || r.cityName || '?');
   if (bad.length) $('foot').textContent += (S.records.length ? ' · ' : '') + '有 ' + bad.length + ' 条记录坐标异常，已先跳过：' + [...new Set(bad)].join('、');
@@ -833,6 +1038,7 @@ function start(geo, data){
   $('legendBtn').addEventListener('click', () => { const pop = $('legendPop'); pop.hidden = !pop.hidden; $('legendBtn').setAttribute('aria-expanded', String(!pop.hidden)); });
 
   const onResize = () => {
+    if (!$('map').clientWidth) return;
     chart.resize();
     if (!S.userMoved && !S.tween) {
       const cd = S.city && S.model.dotMap.get(S.city), pts = S.selected ? S.model.tripMap.get(S.selected).places.map(p => [p.lng, p.lat]) : cd ? [[cd.lng, cd.lat]] : allPoints();
