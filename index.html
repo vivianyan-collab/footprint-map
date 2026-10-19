@@ -59,7 +59,7 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
   background:linear-gradient(160deg,#E6F5F2 0%,#D5EBF0 55%,#C6E2EC 100%);
   box-shadow:0 12px 32px rgba(120,95,60,.16);
 }
-#map{position:absolute;inset:0}
+#map{position:absolute;left:0;right:0;top:0;height:calc(var(--map-h) - 4px)}
 .map-tools{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:3}
 .tool{
   background:rgba(255,253,248,.94);border:1px solid #E6D9C6;border-radius:999px;min-width:38px;height:38px;padding:0 12px;
@@ -227,10 +227,10 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
 .bars{background:rgba(255,253,248,.92);border:1.5px solid #EBDDC6;border-radius:22px;padding:22px 18px 10px;margin-bottom:16px;overflow-x:auto}
 .bars-in{display:flex;gap:clamp(14px,3vw,34px);align-items:flex-end;min-width:min-content;justify-content:center}
 .bcol{display:flex;flex-direction:column;align-items:center;gap:4px}
-.bpair{display:flex;gap:5px;align-items:flex-end;height:96px}
-.bar1{width:22px;border-radius:7px 7px 3px 3px;position:relative;min-height:3px}
+.bpair{display:flex;gap:4px;align-items:flex-end;height:96px}
+.bar1{width:19px;border-radius:7px 7px 3px 3px;position:relative;min-height:3px}
 .bar1 em{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-style:normal;font-family:var(--kl);font-size:13px;color:#6B5A4C}
-.bar1.a{background:#E88A6E}.bar1.b{background:#6DB7B2}
+.bar1.a{background:#E88A6E}.bar1.c{background:#EDB458}.bar1.b{background:#6DB7B2}
 .bcol span{font-family:var(--kl);font-size:15px}
 .bleg{display:flex;justify-content:center;gap:16px;font-size:12.5px;color:var(--soft);margin-top:6px}
 .bleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
@@ -249,6 +249,26 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
 .yp-map{width:100%;border-radius:16px;display:block;background:#D9EDF3}
 @media (min-width:760px){.yp-body{grid-template-columns:1.1fr 1fr;align-items:start}}
 @media (max-width:420px){.d-title.hasst,.d-who.hasst{padding-right:84px}.d-stamp svg{width:84px;height:84px}}
+
+/* ---------- 手机端：地图可收起 / 拖动开关 ---------- */
+.map-mini{display:none;position:absolute;inset:0;z-index:8;align-items:center;gap:10px;padding:0 18px;width:100%;border:none;text-align:left;
+  background:linear-gradient(160deg,#E6F5F2,#D5EBF0);font-family:var(--kl);font-size:16px;color:#5A4036}
+.map-mini .mm-c{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#7A6656;font-size:14px}
+.map-mini .mm-a{color:#E4573D;font-size:14px;white-space:nowrap}
+.tool.on{background:#E4573D;color:#fff;border-color:#E4573D}
+.tool.fold,.tool.drag{display:none}
+@media (max-width:959px){
+  .tool.fold,.tool.drag{display:flex}
+  .map-card.collapsed{height:56px;min-height:0;border-radius:22px}
+  .map-card.collapsed .map-mini{display:flex}
+  .map-card.collapsed .map-tools,.map-card.collapsed .map-bottom,.map-card.collapsed .map-caption,.map-card.collapsed .map-hint,.map-card.collapsed .pill,.map-card.collapsed .year-tick,.map-card.collapsed .map-msg{display:none!important}
+}
+/* ---------- 顺路 ---------- */
+.trip.pass{padding:7px 12px;margin-bottom:7px;border-radius:14px;background:rgba(255,253,248,.7)}
+.trip.pass h4{font-size:15px;color:#8C7B6B}
+.trip.pass .when{font-size:12px;background:rgba(0,0,0,.04);color:#8C7B6B}
+.trip.pass::before{width:9px;height:9px;top:15px;left:-18px;border-width:2px;opacity:.6}
+.tag-pass{font-size:11.5px;color:#9A8F84;border:1px dashed #D9CDBB;border-radius:999px;padding:0 8px;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -276,6 +296,8 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
       <div class="map-tools">
         <button class="tool" id="btnHome" aria-label="回到全部足迹"><span>全景</span></button>
         <button class="tool" id="btnReplay" aria-label="重播点亮动画"><span>重播</span></button>
+        <button class="tool fold" id="btnFold" aria-label="收起地图"><span>收起</span></button>
+        <button class="tool drag" id="btnDrag" aria-label="开关地图拖动"><span>拖动</span></button>
         <button class="tool zoom" id="btnIn" aria-label="放大">+</button>
         <button class="tool zoom" id="btnOut" aria-label="缩小">−</button>
       </div>
@@ -297,6 +319,7 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
         </div>
       </div>
       <div class="map-msg" id="mapMsg">地图准备中…</div>
+      <button class="map-mini" id="mapMini" aria-label="展开地图"><span>地图</span><span class="mm-c" id="mmCtx"></span><span class="mm-a">展开 ⌄</span></button>
     </section>
 
     <aside class="panel" id="panel">
@@ -443,17 +466,19 @@ function buildModel(records, year){
     let t = tripMap.get(id);
     if (!t) { t = {id, year:Number(r.year), month:Number(r.month), day:r.day ? Number(r.day) : null, places:[], who:[], regions:new Set()}; tripMap.set(id, t); }
     const region = regionOfPoint(lng, lat);
-    t.places.push({name, city, lng, lat, key, region, row:Number(r.row) || 0, hotel:clean(r.hotel), memory:clean(r.memory)});
+    const pass = clean(r.tag) === '顺路';
+    t.places.push({name, city, lng, lat, key, region, pass, row:Number(r.row) || 0, hotel:clean(r.hotel), memory:clean(r.memory)});
     if (region) t.regions.add(region);
     clean(r.companions).split(/[、,，;；\/\s]+/).filter(Boolean).forEach(w => { if (!t.who.includes(w)) t.who.push(w); });
     years.add(Number(r.year));
     let d = dotMap.get(key);
-    if (!d) { d = {key, name:city, lng, lat, region, trips:[]}; dotMap.set(key, d); }
+    if (!d) { d = {key, name:city, lng, lat, region, passAll:true, trips:[]}; dotMap.set(key, d); }
+    if (!pass) d.passAll = false;
     if (!d.trips.includes(id)) d.trips.push(id);
   });
   const trips = [...tripMap.values()].sort((a,b) => sortKeyOf(b) - sortKeyOf(a) || (a.id < b.id ? 1 : -1));
   const order = new Map(trips.map((t,i) => [t.id, i]));
-  trips.forEach(t => { t.age = ageOf(t.year, t.month); t.t = clamp(t.age / S.win, 0, 1); t.rgb = rampColor(t.t); t.color = hex(t.rgb); });
+  trips.forEach(t => { t.pass = t.places.length > 0 && t.places.every(p => p.pass); t.age = ageOf(t.year, t.month); t.t = clamp(t.age / S.win, 0, 1); t.rgb = rampColor(t.t); t.color = hex(t.rgb); });
   dotMap.forEach(d => {
     d.trips.sort((a,b) => order.get(a) - order.get(b));
     const latest = tripMap.get(d.trips[0]);                 // 同一城市去过多次，按最近一次上色
@@ -512,7 +537,9 @@ function buildSeries(now){
     const top = c.items[0].v;
     if (c.items.length === 1) {
       const d = top.d, base = focus ? 10 : Math.round(14 - 4 * d.t);
-      singles.push({name:d.name, value:[d.lng, d.lat], key:d.key, symbolSize:Math.max(.01, base * top.s), itemStyle:{color:d.color, shadowColor:rgba(d.rgb, .55)}});
+      const ps = d.passAll && !focus;
+      singles.push({name:d.name, value:[d.lng, d.lat], key:d.key, symbolSize:Math.max(.01, base * (ps ? .7 : 1) * top.s),
+        itemStyle:{color:d.color, shadowColor:rgba(d.rgb, .55), opacity: ps ? .6 : 1}, label: ps ? {fontSize:11, color:'#A09486'} : undefined});
     } else {
       const n = c.items.length, smax = Math.max.apply(null, c.items.map(i => i.v.s));
       const lng = c.items.reduce((s,i) => s + i.v.d.lng, 0) / n, lat = c.items.reduce((s,i) => s + i.v.d.lat, 0) / n;
@@ -629,9 +656,43 @@ function tripTitle(t){ const n = []; t.places.forEach(p => { if (p.name && !n.in
 function showHint(){ if (S.hintShown) return; const h = $('hint'); h.classList.remove('off'); setTimeout(() => h.classList.add('off'), 9000); }
 function markHint(){ S.hintShown = true; $('hint').classList.add('off'); }
 
+/* ============ 手机端：地图收起 / 拖动开关 ============ */
+const TOUCH_LOCK = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches && window.innerWidth < 960);
+let foldHold = 0, foldLock = 0;
+function ctxText(){
+  if (S.selected) { const t = S.model.tripMap.get(S.selected); return t.year + '年' + formatWhen(t) + ' · ' + tripTitle(t); }
+  if (S.city) { const d = S.model.dotMap.get(S.city); return d.name + ' · 去过 ' + d.trips.length + ' 次'; }
+  return (S.year === 'all' ? '全部足迹' : S.year + ' 年') + ' · ' + S.model.trips.length + ' 次出行';
+}
+function setFold(f, hold){
+  if (isDesktop()) f = false;
+  const card = $('mapCard'); if (card.classList.contains('collapsed') === f) { if (!f && hold) foldHold = Date.now() + hold; return; }
+  foldLock = Date.now() + 450; if (!f && hold) foldHold = Date.now() + hold;
+  if (f) $('mmCtx').textContent = ctxText();
+  card.classList.toggle('collapsed', f);
+  if (!f && chart) setTimeout(() => chart.resize(), 30);
+}
+function unfoldFor(){ setFold(false, 1600); }
+function setupFold(){
+  $('btnFold').addEventListener('click', () => setFold(true));
+  $('mapMini').addEventListener('click', () => { setFold(false, 1600); });
+  let last = window.scrollY;
+  window.addEventListener('scroll', () => {
+    if (isDesktop()) return;
+    const y = window.scrollY, dn = y > last; last = y;
+    if (Date.now() < foldLock) return;
+    if (y < 40) { setFold(false); return; }
+    if (dn && y > 260 && Date.now() > foldHold) setFold(true);
+  }, {passive:true});
+  const dg = $('btnDrag');
+  if (TOUCH_LOCK) { /* 默认锁定地图拖动，避免上下滑页面时把地图带偏 */ }
+  else { dg.classList.add('on'); }
+  dg.classList.toggle('on', !TOUCH_LOCK);
+  dg.addEventListener('click', () => { const on = !dg.classList.contains('on'); dg.classList.toggle('on', on); chart.setOption({geo:{roam:on}}); markHint(); });
+}
 function clearFocus(){ if (S.selected) selectTrip(S.selected); else if (S.city) selectCity(S.city); }
 function selectCity(key, force){
-  finishAnim(true); markHint();
+  finishAnim(true); markHint(); unfoldFor();
   if (!force && key === S.city && !S.selected) key = null;   // 再点一次＝取消
   S.city = key; S.selected = null; S.fromCity = null; render();
   document.querySelectorAll('.trip').forEach(el => el.classList.remove('on'));
@@ -649,7 +710,7 @@ function selectTrip(id, opt){
   finishAnim(true);
   if (id && id === S.selected) id = null;                   // 再点一次＝取消选择
   S.fromCity = (id && opt && opt.fromCity) || null; S.city = null;
-  S.selected = id; markHint();
+  S.selected = id; markHint(); unfoldFor();
   render();
   document.querySelectorAll('.trip').forEach(el => el.classList.toggle('on', el.dataset.id === id));
   const cap = $('caption');
@@ -689,11 +750,11 @@ function renderDetail(t){
   box.style.setProperty('--tc', t.color); box.style.setProperty('--tcbg', rgba(t.rgb, .24));
   box.innerHTML =
     (S.fromCity && S.model.dotMap.get(S.fromCity) ? '<button class="d-back" data-act="backcity">← 回到' + esc(S.model.dotMap.get(S.fromCity).name) + '</button>' : '') +
-    '<div class="d-top"><span class="when">' + t.year + '年' + formatWhen(t) + (multi ? ' · ' + stopsOf(t).length + ' 站' : '') + '</span><div class="d-nav">' +
+    '<div class="d-top"><span class="when">' + t.year + '年' + formatWhen(t) + (multi ? ' · ' + stopsOf(t).length + ' 站' : '') + (t.pass ? ' · 顺路' : '') + '</span><div class="d-nav">' +
     '<button data-act="older" title="更早的一次" aria-label="更早的一次"' + (i >= trips.length - 1 ? ' disabled' : '') + '>‹</button>' +
     '<button data-act="newer" title="更近的一次" aria-label="更近的一次"' + (i <= 0 ? ' disabled' : '') + '>›</button>' +
     '<button data-act="close" title="关闭" aria-label="关闭">✕</button></div></div>' +
-    '<div class="d-stamp">' + stampSVG(t, multi ? 90 : 98) + '</div>' +
+    '<div class="d-stamp">' + stampSVG(t, t.pass ? 78 : multi ? 90 : 98) + '</div>' +
     '<h3 class="d-title hasst">' + esc(tripTitle(t)) + '</h3>' + (who ? who.replace('class="d-who"', 'class="d-who hasst"') : '') + chips + (blocks || '<p class="d-empty">这次的小故事还没写下来，等你补上</p>') + editLink(t);
   box.hidden = false;
 }
@@ -706,7 +767,8 @@ function renderCity(d){
   const box = $('detail'), M = S.model;
   const rows = d.trips.map(id => {
     const t = M.tripMap.get(id), st = stopsOf(t), k = st.findIndex(q => q.key === d.key);
-    const ctx = st.length === 1 ? '单独去的' : '长行程 · 第' + (k + 1) + '站 / 共' + st.length + '站';
+    const pp = t.places.find(q => q.key === d.key) || {};
+    const ctx = (st.length === 1 ? '单独去的' : '长行程 · 第' + (k + 1) + '站 / 共' + st.length + '站') + (pp.pass ? ' · 顺路' : '');
     const route = st.length > 1 ? '<div class="c-route">' + st.map((q, i) => i === k ? '<b>' + esc(q.name) + '</b>' : esc(q.name)).join(' → ') + '</div>' : '';
     const pl = t.places.find(q => q.key === d.key) || {};
     const note = pl.memory || pl.hotel;
@@ -729,9 +791,9 @@ function renderTimeline(){
     const who = t.who.length ? '<div class="who">' + t.who.map(w => '<span class="pill2" style="background:' + avColor(w) + '33">' + esc(w) + '</span>').join('') + '</div>' : '';
     const mem = (t.places.find(p => p.memory) || {}).memory;
     const style = '--tc:' + t.color + ';--tcbg:' + rgba(t.rgb, .22) + ';--tcsh:' + rgba(t.rgb, .26);
-    html += '<article class="trip' + (t.id === S.selected ? ' on' : '') + '" data-id="' + esc(t.id) + '" style="' + style + '" tabindex="0" role="button">' +
-      '<div class="trip-top"><span class="when">' + formatWhen(t) + '</span><h4>' + esc(tripTitle(t)) + '</h4>' + (stopsOf(t).length > 1 ? '<span class="nstop">' + stopsOf(t).length + ' 站</span>' : '') + '<span class="chev">›</span></div>' + who +
-      (mem ? '<p class="snip">' + esc(mem) + '</p>' : '') + '</article>';
+    html += '<article class="trip' + (t.pass ? ' pass' : '') + (t.id === S.selected ? ' on' : '') + '" data-id="' + esc(t.id) + '" style="' + style + '" tabindex="0" role="button">' +
+      '<div class="trip-top"><span class="when">' + formatWhen(t) + '</span><h4>' + esc(tripTitle(t)) + '</h4>' + (t.pass ? '<span class="tag-pass">顺路</span>' : stopsOf(t).length > 1 ? '<span class="nstop">' + stopsOf(t).length + ' 站</span>' : '') + '<span class="chev">›</span></div>' + (t.pass ? '' : who) +
+      (mem && !t.pass ? '<p class="snip">' + esc(mem) + '</p>' : '') + '</article>';
   });
   box.innerHTML = html + '</div>';
 }
@@ -824,7 +886,7 @@ function replay(total){
 /* ============ 切换年份 ============ */
 function setYear(y){
   if (y === S.year) return;
-  finishAnim(true);
+  finishAnim(true); unfoldFor();
   S.year = y; S.selected = null; S.city = null; S.fromCity = null; S.model = buildModel(S.records, y); S.curCounts = S.model.regionCounts;
   $('caption').classList.remove('on'); renderDetail(null); markHint();
   renderYears(); renderSummary(); renderTimeline();
@@ -844,7 +906,7 @@ function stampSVG(t, px){
   let body, w = 150, hgt = 150;
   if (st.length === 1) {
     const p = st[0], n = ordinalOf(t.id, p.key), name = Array.from(p.name || p.city || '');
-    const top = n === 1 ? 'NEW' : n > 1 ? '第 ' + n + ' 次' : 'FOOTPRINT';
+    const top = t.pass ? '顺路' : n === 1 ? 'NEW' : n > 1 ? '第 ' + n + ' 次' : 'FOOTPRINT';
     let nm;
     if (name.length <= 2) nm = T(75, 75 + 32 * .35, 32, name.join(''));
     else if (name.length === 3) nm = T(75, 75 + 28 * .35, 28, name.join(''));
@@ -857,14 +919,23 @@ function stampSVG(t, px){
       '<path d="M44 51h62M44 101h62" stroke-width="1.2"/></g>';
   } else {
     w = 190; hgt = 120;
-    const first = st[0].name || st[0].city, last = st[st.length - 1].name || st[st.length - 1].city;
-    const isNew = st.some(p => ordinalOf(t.id, p.key) === 1);
-    const fit = nm => Array.from(nm).length > 4 ? 17 : 22;
+    const isNew = !t.pass && st.some(p => ordinalOf(t.id, p.key) === 1);
+    const names = st.map(p => p.name || p.city);
+    let lines = names.slice(), fsBase = 22, y0 = 40, dy = 26;
+    if (names.length === 3) { fsBase = 17; y0 = 34; dy = 19; }
+    else if (names.length === 4) { fsBase = 14; y0 = 31; dy = 15; }
+    else if (names.length >= 5) { lines = names.slice(0, 3).concat(['… 共 ' + names.length + ' 站']); fsBase = 14; y0 = 31; dy = 15; }
+    const sep = names.length >= 3 ? 82 : 76, dateY = names.length >= 3 ? 101 : 97;
+    const txt = lines.map((nm, i) => {
+      const label = (i < lines.length - 1 && !(names.length >= 5 && i === lines.length - 1) ? nm + ' →' : nm), len = Array.from(label).length;
+      const fs = Math.min(fsBase, Math.floor(140 / Math.max(len, 1)));
+      return T(95, y0 + i * dy, fs, label);
+    }).join('');
     body = '<g filter="url(#ink)" fill="none" stroke="' + col + '" stroke-width="3"><rect x="6" y="6" width="178" height="108" rx="16"/><rect x="13" y="13" width="164" height="94" rx="11" stroke-width="1.3"/>' +
-      '<g fill="' + col + '" stroke="none">' + T(95, 42, fit(first), first + ' →') + T(95, 68, fit(last), last) + T(95, 97, 14, ym + ' · ' + st.length + ' 站', 'letter-spacing="1.5"') +
-      (isNew ? T(150, 30, 11, 'NEW', 'letter-spacing="1"') : '') + '</g><path d="M38 76h114" stroke-width="1.2"/></g>';
+      '<g fill="' + col + '" stroke="none">' + txt + T(95, dateY, 13, ym + ' · ' + st.length + ' 站', 'letter-spacing="1.2"') +
+      (isNew ? T(158, 28, 10, 'NEW', 'letter-spacing="1"') : '') + '</g><path d="M38 ' + sep + 'h114" stroke-width="1.2"/></g>';
   }
-  return '<svg class="stamp" width="' + Math.round(px * w / 150) + '" height="' + Math.round(px * hgt / 150) + '" viewBox="0 0 ' + w + ' ' + hgt + '" style="transform:rotate(' + rot + 'deg)" role="img" aria-label="' + esc(tripTitle(t)) + ' ' + t.year + '年' + t.month + '月的印章">' + body + '</svg>';
+  return '<svg class="stamp" width="' + Math.round(px * w / 150) + '" height="' + Math.round(px * hgt / 150) + '" viewBox="0 0 ' + w + ' ' + hgt + '" style="transform:rotate(' + rot + 'deg)' + (t.pass ? ';opacity:.6' : '') + '" role="img" aria-label="' + esc(tripTitle(t)) + ' ' + t.year + '年' + t.month + '月的印章">' + body + '</svg>';
 }
 
 /* ============ 年度回顾 ============ */
@@ -875,8 +946,7 @@ function reviewRows(){
     const ts = byY.get(y), keys = new Set(), cnt = new Map();
     ts.forEach(t => { const seen = new Set(); stopsOf(t).forEach(p => { keys.add(p.key); if (!seen.has(p.key)) { seen.add(p.key); cnt.set(p.key, (cnt.get(p.key) || 0) + 1); } }); });
     let fav = null, fc = 0; cnt.forEach((c, k) => { if (c > fc) { fc = c; fav = k; } });
-    return {y, trips: ts, n: ts.length, cities: keys.size, nw: [...keys].filter(k => S.hist.firstYear.get(k) === y).length,
-      fav: fc >= 2 ? {name: S.all.dotMap.get(fav).name, c: fc} : null};
+    return {y, trips: ts, n: ts.length, cities: keys.size, nw: [...keys].filter(k => S.hist.firstYear.get(k) === y).length};
   });
 }
 const delta = (cur, prev) => prev == null ? '' : cur > prev ? '<i class="dl up">▲ ' + (cur - prev) + '</i>' : cur < prev ? '<i class="dl dn">▼ ' + (prev - cur) + '</i>' : '<i class="dl eq">持平</i>';
@@ -910,20 +980,20 @@ function drawMini(cv, row, B){
 function renderReview(){
   const box = $('viewReview'), rows = reviewRows();
   if (!rows.length) { box.innerHTML = '<p class="rv-sub" style="padding:40px 0">还没有记录，等第一段旅程来点亮</p>'; return; }
-  const mx = Math.max.apply(null, rows.map(r => Math.max(r.n, r.nw, 1)));
-  const bars = rows.map(r => '<div class="bcol"><div class="bpair"><div class="bar1 a" style="height:' + Math.max(3, r.n / mx * 84) + 'px"><em>' + r.n + '</em></div><div class="bar1 b" style="height:' + Math.max(3, r.nw / mx * 84) + 'px"><em>' + r.nw + '</em></div></div><span>' + r.y + '</span></div>').join('');
+  const mx = Math.max.apply(null, rows.map(r => Math.max(r.n, r.cities, r.nw, 1)));
+  const bar = (cls, v) => '<div class="bar1 ' + cls + '" style="height:' + Math.max(3, v / mx * 84) + 'px"><em>' + v + '</em></div>';
+  const bars = rows.map(r => '<div class="bcol"><div class="bpair">' + bar('a', r.n) + bar('c', r.cities) + bar('b', r.nw) + '</div><span>' + r.y + '</span></div>').join('');
   const pages = rows.slice().reverse().map(r => {
     const prev = rows.find(q => q.y === r.y - 1);
-    const stamps = r.trips.map(t => stampSVG(t, 104)).join('');
+    const stamps = r.trips.map(t => stampSVG(t, t.pass ? 80 : 104)).join('');
     return '<article class="ypage" data-y="' + r.y + '"><div class="yp-head"><b>' + r.y + '</b></div><div class="yp-m">' +
-      '<div class="ym"><b>' + r.n + delta(r.n, prev && prev.n) + '</b><span>次出发</span></div>' +
+      '<div class="ym"><b>' + r.n + delta(r.n, prev && prev.n) + '</b><span>次出行</span></div>' +
       '<div class="ym"><b>' + r.cities + delta(r.cities, prev && prev.cities) + '</b><span>个城市</span></div>' +
       '<div class="ym"><b>' + r.nw + delta(r.nw, prev && prev.nw) + '</b><span>个新点亮</span></div>' +
-      (r.fav ? '<div class="ym"><b>' + esc(r.fav.name) + '</b><span>最爱 · 去了 ' + r.fav.c + ' 次</span></div>' : '') +
       '</div><div class="yp-body"><div class="yp-stamps">' + stamps + '</div><canvas class="yp-map"></canvas></div></article>';
   }).join('');
   box.innerHTML = '<h2 class="rv-title">年度回顾</h2><p class="rv-sub">每一年一页，盖满这一年的印章</p>' +
-    '<div class="bars"><div class="bars-in">' + bars + '</div><div class="bleg"><span><i style="background:#E88A6E"></i>出发次数</span><span><i style="background:#6DB7B2"></i>新点亮的城市</span></div></div>' + pages;
+    '<div class="bars"><div class="bars-in">' + bars + '</div><div class="bleg"><span><i style="background:#E88A6E"></i>出行次数</span><span><i style="background:#EDB458"></i>旅行城市</span><span><i style="background:#6DB7B2"></i>新点亮城市</span></div></div>' + pages;
   drawReviewMaps();
 }
 function drawReviewMaps(){
@@ -979,14 +1049,14 @@ function start(geo, data){
         let latest = null; set.forEach(id => { const t = S.model.tripMap.get(id); if (t && (!latest || sortKeyOf(t) > sortKeyOf(latest))) latest = t; });
         return '<b>' + esc(key) + '</b> · 去过 ' + set.size + ' 次' + (latest ? '<br><span style="color:#8C827A">最近一次 ' + latest.year + '年' + latest.month + '月</span>' : '');
       }},
-    geo:{map:'asia', roam:true, aspectScale:.9, center:[108,20], zoom:1, scaleLimit:{min:1, max:60},
+    geo:{map:'asia', roam:!TOUCH_LOCK, aspectScale:.9, center:[108,20], zoom:1, scaleLimit:{min:1, max:60},
       itemStyle:{areaColor:C.land, borderColor:C.border, borderWidth:1}, label:{show:false}, regions: buildRegions(S.curCounts)}
   });
   const first = fitTo(allPoints()); setView(first.center, first.zoom); afterMove(); render();
 
   renderStats(); renderYears(); renderSummary(); renderTimeline(); renderLegend(); setupMemlane();
   $('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showView(b.dataset.v); });
-  fitMapHeight();
+  fitMapHeight(); setupFold();
   let rvT = 0; window.addEventListener('resize', () => { fitMapHeight(); clearTimeout(rvT); rvT = setTimeout(drawReviewMaps, 200); });
   if (data && data.updatedAt) { const d = new Date(data.updatedAt); if (!isNaN(d)) $('foot').textContent = '足迹最近更新于 ' + d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日'; }
   const bad = S.records.filter(r => !validCoord(r)).map(r => r.destination || r.cityName || '?');
