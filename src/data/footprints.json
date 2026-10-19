@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-19T03:18:12.567Z",
+  "updatedAt": "2026-10-19T08:43:49.145Z",
   "totalTrips": 21,
   "totalLocations": 21,
   "sheetUrl": "https://docs.google.com/spreadsheets/d/19hYM9nrmCI7Nz16ggSDmSyTNKEVNxOI0H1WMiLrysVs/edit#gid=0",
@@ -18,7 +18,8 @@
       "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
-      "memory": ""
+      "memory": "",
+      "tag": "顺路"
     },
     {
       "row": 3,
@@ -34,7 +35,8 @@
       "lat": 23.13,
       "companions": "爷爷奶奶",
       "hotel": "长隆-熊猫酒店",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 4,
@@ -50,7 +52,8 @@
       "lat": 36.06,
       "companions": "田田、大鹏",
       "hotel": "大鹏家",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 5,
@@ -66,7 +69,8 @@
       "lat": 22.58,
       "companions": "",
       "hotel": "江门名冠金凯悦",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 6,
@@ -82,7 +86,8 @@
       "lat": 22.81,
       "companions": "陈琦家庭",
       "hotel": "方特-家属区",
-      "memory": "大玩特玩畅玩 南昌方特"
+      "memory": "大玩特玩畅玩 南昌方特",
+      "tag": ""
     },
     {
       "row": 7,
@@ -98,7 +103,8 @@
       "lat": 26.25,
       "companions": "田田",
       "hotel": "华住",
-      "memory": "酒店惊魂：安宝半夜的手骨折！"
+      "memory": "酒店惊魂：安宝半夜的手骨折！",
+      "tag": ""
     },
     {
       "row": 8,
@@ -114,7 +120,8 @@
       "lat": 23.35,
       "companions": "",
       "hotel": "亚朵",
-      "memory": "小公园&夜市&超好吃的大碗牛腩！老公超会找好吃的，路边走的都好吃！"
+      "memory": "小公园&夜市&超好吃的大碗牛腩！老公超会找好吃的，路边走的都好吃！",
+      "tag": ""
     },
     {
       "row": 9,
@@ -130,7 +137,8 @@
       "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
-      "memory": ""
+      "memory": "",
+      "tag": "顺路"
     },
     {
       "row": 10,
@@ -146,7 +154,8 @@
       "lat": 18.25,
       "companions": "爷爷奶奶、姥姥姥爷",
       "hotel": "民宿+海棠湾洲际",
-      "memory": "海边好美啊~~~~拍照的西瓜甜不甜！"
+      "memory": "海边好美啊~~~~拍照的——西瓜甜不甜！",
+      "tag": ""
     },
     {
       "row": 11,
@@ -162,7 +171,8 @@
       "lat": 22.52,
       "companions": "丁丁家庭",
       "hotel": "喜来登",
-      "memory": "乳鸽好吃"
+      "memory": "乳鸽好吃",
+      "tag": ""
     },
     {
       "row": 12,
@@ -178,7 +188,8 @@
       "lat": 28.68,
       "companions": "",
       "hotel": "华住酒店+花间筑",
-      "memory": "看喷泉+念念不忘的老菜香！"
+      "memory": "看喷泉+念念不忘的老菜香！",
+      "tag": ""
     },
     {
       "row": 13,
@@ -194,7 +205,8 @@
       "lat": 21.27,
       "companions": "",
       "hotel": "民大喜来登",
-      "memory": "海边，被评为三亚平替"
+      "memory": "海边，被评为三亚平替",
+      "tag": ""
     },
     {
       "row": 14,
@@ -210,7 +222,8 @@
       "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
-      "memory": ""
+      "memory": "",
+      "tag": "顺路"
     },
     {
       "row": 15,
@@ -226,7 +239,8 @@
       "lat": 22,
       "companions": "",
       "hotel": "菠萝酒店+傣族村后面的花间筑",
-      "memory": "市区骑电动，爬树好玩，去丛林探险好玩~"
+      "memory": "市区骑电动，爬树好玩，去丛林探险好玩~",
+      "tag": ""
     },
     {
       "row": 16,
@@ -242,7 +256,8 @@
       "lat": 25.04,
       "companions": "",
       "hotel": "公园旁华住酒店",
-      "memory": "酒店好多跳跳糖，在公园看到了松鼠🐿"
+      "memory": "酒店好多跳跳糖，在公园看到了松鼠🐿",
+      "tag": ""
     },
     {
       "row": 17,
@@ -258,7 +273,8 @@
       "lat": 23.05,
       "companions": "",
       "hotel": "七星岩至尊温德姆",
-      "memory": "七星岩跨年倒计时 🎆"
+      "memory": "七星岩跨年倒计时 🎆",
+      "tag": ""
     },
     {
       "row": 18,
@@ -272,9 +288,10 @@
       "country": "中国",
       "lng": 113.57,
       "lat": 22.27,
-      "companions": "辉姐",
+      "companions": "辉姐、奶奶",
       "hotel": "御温泉渡假村",
-      "memory": "泡温泉放飞心情 ♨️"
+      "memory": "泡温泉放飞心情 ♨️",
+      "tag": ""
     },
     {
       "row": 19,
@@ -290,7 +307,8 @@
       "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
-      "memory": ""
+      "memory": "",
+      "tag": "顺路"
     },
     {
       "row": 20,
@@ -306,7 +324,8 @@
       "lat": 30,
       "companions": "",
       "hotel": "鲁迅故里漫心府",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 21,
@@ -322,7 +341,8 @@
       "lat": 30.28,
       "companions": "",
       "hotel": "杭州西湖玉泉美居",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 22,
@@ -338,7 +358,8 @@
       "lat": 23.68,
       "companions": "",
       "hotel": "长隆-长颈鹿酒店",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 23,
@@ -354,7 +375,8 @@
       "lat": 22.31,
       "companions": "田田",
       "hotel": "/",
-      "memory": "香港迪士尼"
+      "memory": "香港迪士尼",
+      "tag": ""
     },
     {
       "row": 24,
@@ -370,7 +392,8 @@
       "lat": 23.13,
       "companions": "田田",
       "hotel": "全季酒店",
-      "memory": ""
+      "memory": "",
+      "tag": ""
     },
     {
       "row": 25,
@@ -386,7 +409,8 @@
       "lat": 26.57,
       "companions": "田田",
       "hotel": "田田家",
-      "memory": ""
+      "memory": "",
+      "tag": "顺路"
     },
     {
       "row": 26,
@@ -402,7 +426,8 @@
       "lat": 10.76,
       "companions": "田田、雪雪",
       "hotel": "嘉佩乐",
-      "memory": "超有艺术气息的酒店+包场游泳池（香蕉片好吃）"
+      "memory": "超有艺术气息的酒店+包场游泳池（香蕉片好吃）",
+      "tag": ""
     },
     {
       "row": 27,
@@ -418,7 +443,8 @@
       "lat": 10.28,
       "companions": "田田、雪雪",
       "hotel": "喜来登 Villa",
-      "memory": "海边的超大游泳池🌊，海边日落超级美 🌅，超美的海边缆车🚠"
+      "memory": "海边的超大游泳池🌊，海边日落超级美 🌅，超美的海边缆车🚠",
+      "tag": ""
     },
     {
       "row": 28,
@@ -434,7 +460,8 @@
       "lat": 22.52,
       "companions": "田田、雪雪",
       "hotel": "桔子酒店",
-      "memory": "去了小榄~小榄人家好吃！日料下一次吃"
+      "memory": "去了小榄~小榄人家好吃！日料下一次吃",
+      "tag": ""
     }
   ]
 }
