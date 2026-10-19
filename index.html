@@ -31,6 +31,11 @@ body::before{
     radial-gradient(420px 320px at 52% 48%,rgba(255,238,190,.35),transparent 70%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .45 0 0 0 0 .3 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:url("./src/bg-desktop.jpg") center top/cover no-repeat;
+}
+@media (max-width:700px){body::after{background-image:url("./src/bg-mobile.jpg")}}
 button{font:inherit;color:inherit;cursor:pointer}
 .page{max-width:1260px;margin:0 auto;padding:0 16px 28px}
 
@@ -45,11 +50,6 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
 .stat b{display:block;font-family:var(--kl);font-weight:400;font-size:clamp(26px,6.6vw,38px);line-height:1.1}
 .stat:nth-child(1) b{color:#E4573D}.stat:nth-child(2) b{color:#E2992E}.stat:nth-child(3) b{color:#3E9C97}.stat:nth-child(4) b{color:#D9648A}
 .stat span{font-size:12px;color:var(--soft);letter-spacing:.04em;white-space:nowrap}
-.doodle{position:absolute;font-size:30px;pointer-events:none;animation:float 5s ease-in-out infinite;filter:drop-shadow(0 2px 2px rgba(120,80,40,.12))}
-.d1{left:7%;top:22px;transform:rotate(-12deg)}.d2{right:8%;top:30px;animation-delay:-1.6s}
-.d3{left:15%;bottom:14px;font-size:22px;animation-delay:-3s}.d4{right:16%;bottom:10px;font-size:24px;animation-delay:-2.2s}
-@keyframes float{0%,100%{translate:0 0}50%{translate:0 -6px}}
-@media (max-width:640px){.d1{left:2%;top:8px;font-size:24px}.d2{right:2%;top:10px;font-size:24px}.d3,.d4{display:none}}
 
 /* ---------- 布局 ---------- */
 .layout{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
@@ -178,6 +178,18 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
 .d-pname{font-family:var(--kl);font-size:17px;margin-bottom:2px}
 .d-hotel{font-size:13.5px;color:#6B6058}
 .d-mem{font-family:var(--kl);font-size:19px;line-height:1.75;color:#5A4036;margin-top:3px}
+.d-back{border:none;background:none;font-family:var(--kl);font-size:14px;color:#8C6A4A;padding:0;margin-bottom:2px}
+.d-back:hover{color:#E4573D}
+.d-sub{font-size:13px;color:var(--soft);margin:-2px 0 8px}
+.c-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.c-row{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:9px 12px;border-left:6px solid var(--tc)}
+.c-row:hover{background:var(--tcbg)}
+.c-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.c-when{font-family:var(--kl);font-size:17px}
+.c-ctx{font-size:12.5px;color:#8C6A4A;background:var(--tcbg);border-radius:999px;padding:0 9px}
+.c-route{font-size:13px;color:var(--soft);margin-top:2px}.c-route b{color:#5A4036;font-weight:600}
+.c-note{font-size:13.5px;color:#6B6058;margin-top:3px}
+.nstop{font-size:12px;color:#8C6A4A;background:var(--tcbg);border-radius:999px;padding:0 8px;white-space:nowrap}
 .d-empty{font-family:var(--kl);color:var(--soft);font-size:16px;padding:6px 0}
 
 /* ---------- 桌面端：左地图右面板（面板内部滚动，选中的详情永远在最上面） ---------- */
@@ -213,15 +225,15 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
       <div id="map"></div>
       <div class="map-caption" id="caption"><span class="dot"></span><span class="t" id="captionText"></span><button id="captionClose" aria-label="取消选择">✕</button></div>
       <div class="map-tools">
-        <button class="tool" id="btnHome" aria-label="回到全部足迹">🧭 <span>全景</span></button>
-        <button class="tool" id="btnReplay" aria-label="重播点亮动画">🎬 <span>重播</span></button>
+        <button class="tool" id="btnHome" aria-label="回到全部足迹"><span>全景</span></button>
+        <button class="tool" id="btnReplay" aria-label="重播点亮动画"><span>重播</span></button>
         <button class="tool zoom" id="btnIn" aria-label="放大">+</button>
         <button class="tool zoom" id="btnOut" aria-label="缩小">−</button>
       </div>
-      <div class="map-hint off" id="hint">点一点光点，看看那次旅行 ✨</div>
+      <div class="map-hint off" id="hint">点一点光点，看看那次旅行</div>
       <div class="year-tick" id="yearTick"></div>
       <button class="pill" id="skipPill">跳过动画 ⏭</button>
-      <button class="pill back" id="backPill">🧭 回到足迹</button>
+      <button class="pill back" id="backPill">回到足迹</button>
       <div class="map-bottom">
         <div class="legend-pop" id="legendPop" hidden>
           <div class="lg-title">光点颜色 · 去的时间</div>
@@ -231,7 +243,7 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
           <div class="steps" id="legSteps"></div>
         </div>
         <div class="bottom-row">
-          <button class="legend-btn" id="legendBtn" aria-expanded="false">🎨 图例</button>
+          <button class="legend-btn" id="legendBtn" aria-expanded="false">图例</button>
           <div class="years" id="years" role="tablist" aria-label="按年份查看"></div>
         </div>
       </div>
@@ -341,12 +353,17 @@ function computeWindow(records){
   records.forEach(r => { if (r.year && r.month) maxAge = Math.max(maxAge, ageOf(r.year, r.month)); });
   return clamp(maxAge, 12, 36);                              // 渐变跨度：最短1年、最长3年
 }
+function validCoord(r){
+  if (r.lng === '' || r.lat === '' || r.lng == null || r.lat == null) return false;
+  const x = Number(r.lng), y = Number(r.lat);
+  return isFinite(x) && isFinite(y) && Math.abs(x) <= 180 && Math.abs(y) <= 90 && !(x === 0 && y === 0);
+}
 function buildModel(records, year){
   const recs = records.filter(r => year === 'all' || Number(r.year) === year);
   const tripMap = new Map(), dotMap = new Map(), years = new Set();
   recs.forEach((r, idx) => {
+    if (!validCoord(r)) return;
     const lng = Number(r.lng), lat = Number(r.lat);
-    if (!isFinite(lng) || !isFinite(lat)) return;
     const name = clean(r.destination) || clean(r.cityName);
     const city = clean(r.cityName) || name;
     const key = clean(r.cityCode) || (lng + ',' + lat);
@@ -413,46 +430,52 @@ function clusterize(vis){
 function buildSeries(now){
   now = now || performance.now();
   const sel = S.selected ? S.model.tripMap.get(S.selected) : null;
-  const selKeys = new Set(sel ? sel.places.map(p => p.key) : []);
+  const cityD = !sel && S.city ? S.model.dotMap.get(S.city) : null;
+  const selKeys = new Set(sel ? sel.places.map(p => p.key) : cityD ? [cityD.key] : []);
+  const focus = !!(sel || cityD), stops = sel ? stopsOf(sel) : [], multi = stops.length > 1;
   const vis = visibleDots(now);
   const cl = clusterize(vis.filter(v => !selKeys.has(v.d.key)));
   const singles = [], bubbles = [], rings = [];
   cl.forEach(c => {
     const top = c.items[0].v;
     if (c.items.length === 1) {
-      const d = top.d, base = sel ? 10 : Math.round(14 - 4 * d.t);
+      const d = top.d, base = focus ? 10 : Math.round(14 - 4 * d.t);
       singles.push({name:d.name, value:[d.lng, d.lat], key:d.key, symbolSize:Math.max(.01, base * top.s), itemStyle:{color:d.color, shadowColor:rgba(d.rgb, .55)}});
     } else {
       const n = c.items.length, smax = Math.max.apply(null, c.items.map(i => i.v.s));
       const lng = c.items.reduce((s,i) => s + i.v.d.lng, 0) / n, lat = c.items.reduce((s,i) => s + i.v.d.lat, 0) / n;
       bubbles.push({name:String(n), value:[lng, lat], members:c.items.map(i => i.v.d.key), symbolSize:Math.max(.01, (24 + Math.min(n, 8) * 2.5) * smax),
-        itemStyle:{color:top.d.color, borderColor:'#FFFDF8', borderWidth:3, shadowBlur:12, shadowColor:rgba(top.d.rgb, .55)}});
+        itemStyle:{color:top.d.color, borderColor:'#FFFDF8', borderWidth:3, shadowBlur:12, shadowColor:rgba(top.d.rgb, .55), opacity: focus ? .5 : 1}});
     }
     c.items.forEach(i => {
       if (S.anim && i.v.age >= 0 && i.v.age < 900) { const t = i.v.age / 900; rings.push({value:[i.v.d.lng, i.v.d.lat], symbolSize:12 + 46 * t, itemStyle:{color:'rgba(0,0,0,0)', borderColor:i.v.d.color, borderWidth:2.5, opacity:1 - t}}); }
     });
   });
-  const hi = sel ? vis.filter(v => selKeys.has(v.d.key)).map(v => ({name:v.d.name, value:[v.d.lng, v.d.lat], key:v.d.key,
-    itemStyle:{color:sel.color, borderColor:C.ink, borderWidth:3, shadowColor:rgba(sel.rgb, .6)}})) : [];
+  const hi = sel ? stops.map((p, i) => ({name:p.name, n:String(i + 1), value:[p.lng, p.lat], key:p.key,
+    itemStyle:{color:sel.color, borderColor:'#FFFDF8', borderWidth:3, shadowColor:rgba(sel.rgb, .6)}}))
+    : cityD ? [{name:cityD.name, n:'', value:[cityD.lng, cityD.lat], key:cityD.key, itemStyle:{color:cityD.color, borderColor:C.ink, borderWidth:3, shadowColor:rgba(cityD.rgb, .6)}}] : [];
   const ghost = (S.year === 'all' || S.anim) ? [] : S.all.dots.filter(d => !S.model.dotKeys.has(d.key)).map(d => ({name:d.name, value:[d.lng, d.lat]}));
   const lines = [];
   if (sel) {
-    const uniq = []; sel.places.forEach(p => { if (!uniq.some(q => q.key === p.key)) uniq.push(p); });
-    for (let i = 0; i < uniq.length - 1; i++) lines.push({coords:[[uniq[i].lng, uniq[i].lat], [uniq[i+1].lng, uniq[i+1].lat]]});
+    for (let i = 0; i < stops.length - 1; i++) lines.push({coords:[[stops[i].lng, stops[i].lat], [stops[i+1].lng, stops[i+1].lat]]});
+  } else if (S.anim && S.anim.segs) {
+    S.anim.segs.forEach(sg => { const A = S.model.dotMap.get(sg[0]), B = S.model.dotMap.get(sg[1]); if (A && B) lines.push({coords:[[A.lng, A.lat], [B.lng, B.lat]]}); });
   }
   const label = size => ({show:true, formatter:'{b}', position:'right', distance:8, color:C.ink, fontSize:size, fontFamily:FONT, textBorderColor:'#FFF8EE', textBorderWidth:3});
   const off = {show:false};
   return [
-    {id:'lines', type:'lines', coordinateSystem:'geo', silent:true, zlevel:1, data:lines, lineStyle:{color:C.ink, width:1.8, type:'dashed', opacity:.55, curveness:.25}},
+    {id:'lines', type:'lines', coordinateSystem:'geo', silent:true, zlevel:1, data:lines, symbol:['none','arrow'], symbolSize:8, lineStyle:{color:C.ink, width:2, type:'dashed', opacity:.6, curveness:.25}},
     {id:'ghost', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:1, data:ghost, symbolSize:7, itemStyle:{color:C.ghost, opacity:.55, borderColor:'#FFFDF8', borderWidth:1.5}},
     {id:'rings', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:2, data:rings, symbol:'circle'},
     {id:'dots', type:'scatter', coordinateSystem:'geo', zlevel:2, data:singles, tooltip:off,
-     itemStyle:{borderColor:'#FFFDF8', borderWidth:2.5, shadowBlur:10, opacity: sel ? .85 : 1},
-     label: Object.assign(label(13), {show: !sel}), labelLayout:{hideOverlap:true}, emphasis:{scale:1.25}},
+     itemStyle:{borderColor:'#FFFDF8', borderWidth:2.5, shadowBlur:10, opacity: focus ? .45 : 1},
+     label: Object.assign(label(13), {show: !focus}), labelLayout:{hideOverlap:true}, emphasis:{scale:1.25}},
     {id:'bubbles', type:'scatter', coordinateSystem:'geo', zlevel:3, data:bubbles, tooltip:off, symbol:'circle',
      label:{show:true, position:'inside', formatter:'{b}', color:'#FFFFFF', fontSize:16, fontFamily:FONT, textBorderColor:'rgba(90,40,10,.35)', textBorderWidth:2}, emphasis:{scale:1.12}},
-    {id:'sel', type:'effectScatter', coordinateSystem:'geo', zlevel:4, data:hi, symbolSize:17, tooltip:off,
-     rippleEffect:{scale:3.2, period:4, brushType:'fill', color: sel ? sel.color : C.ink}, itemStyle:{shadowBlur:10}, label:label(15)}
+    {id:'sel', type:'effectScatter', coordinateSystem:'geo', zlevel:4, data:hi, symbolSize: multi ? 24 : 17, tooltip:off,
+     rippleEffect:{scale: multi ? 2.2 : 3.2, period:4, brushType:'fill', color: sel ? sel.color : cityD ? cityD.color : C.ink}, itemStyle:{shadowBlur:10},
+     label: multi ? {show:true, position:'inside', formatter:p => p.data.n, color:'#FFFFFF', fontSize:13, fontFamily:FONT, textBorderColor:'rgba(90,40,10,.4)', textBorderWidth:2} : label(15)},
+    {id:'selNames', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:4, data: multi ? hi : [], symbolSize:1, tooltip:off, itemStyle:{color:'rgba(0,0,0,0)', borderWidth:0}, label:Object.assign(label(15), {distance:17}), labelLayout:{hideOverlap:false}}
   ];
 }
 let renderTimer = 0, lastRender = 0;
@@ -529,13 +552,31 @@ function updateBackPill(){
 
 /* ============ 选择旅行 ============ */
 const formatWhen = t => t.month + '月' + (t.day ? t.day + '日' : '');
-function tripTitle(t){ const n = []; t.places.forEach(p => { if (p.name && !n.includes(p.name)) n.push(p.name); }); return n.join(' · '); }
+function stopsOf(t){ const u = []; t.places.forEach(p => { if (!u.some(q => q.key === p.key)) u.push(p); }); return u; }
+function tripTitle(t){ const n = []; t.places.forEach(p => { if (p.name && !n.includes(p.name)) n.push(p.name); }); return n.join(' → '); }
 function showHint(){ if (S.hintShown) return; const h = $('hint'); h.classList.remove('off'); setTimeout(() => h.classList.add('off'), 9000); }
 function markHint(){ S.hintShown = true; $('hint').classList.add('off'); }
 
+function clearFocus(){ if (S.selected) selectTrip(S.selected); else if (S.city) selectCity(S.city); }
+function selectCity(key, force){
+  finishAnim(true); markHint();
+  if (!force && key === S.city && !S.selected) key = null;   // 再点一次＝取消
+  S.city = key; S.selected = null; S.fromCity = null; render();
+  document.querySelectorAll('.trip').forEach(el => el.classList.remove('on'));
+  const cap = $('caption');
+  if (!key) { cap.classList.remove('on'); renderDetail(null); fitAll(900); return; }
+  const d = S.model.dotMap.get(key);
+  $('captionText').textContent = d.name + ' · 去过 ' + d.trips.length + ' 次';
+  cap.style.setProperty('--tc', d.color); cap.classList.add('on');
+  d.trips.forEach(id => { const el = document.querySelector('.trip[data-id="' + id + '"]'); if (el) el.classList.add('on'); });
+  renderCity(d);
+  flyTo(fitTo([[d.lng, d.lat]], {minLng:10, minLat:8}), 900);
+  scrollToDetail();
+}
 function selectTrip(id, opt){
   finishAnim(true);
   if (id && id === S.selected) id = null;                   // 再点一次＝取消选择
+  S.fromCity = (id && opt && opt.fromCity) || null; S.city = null;
   S.selected = id; markHint();
   render();
   document.querySelectorAll('.trip').forEach(el => el.classList.toggle('on', el.dataset.id === id));
@@ -545,7 +586,7 @@ function selectTrip(id, opt){
     $('captionText').textContent = t.year + '年' + formatWhen(t) + ' · ' + tripTitle(t);
     cap.style.setProperty('--tc', t.color); cap.classList.add('on');
     renderDetail(t);
-    const single = new Set(t.places.map(p => p.key)).size === 1;
+    const single = stopsOf(t).length === 1;
     flyTo(fitTo(t.places.map(p => [p.lng, p.lat]), {minLng: single ? 10 : 6, minLat: single ? 8 : 5}), 900);
     scrollToDetail();
   } else { cap.classList.remove('on'); renderDetail(null); fitAll(900); }
@@ -565,26 +606,45 @@ function renderDetail(t){
   const box = $('detail');
   if (!t) { box.hidden = true; box.innerHTML = ''; return; }
   const trips = S.model.trips, i = trips.findIndex(x => x.id === t.id);
-  const multi = new Set(t.places.map(p => p.key)).size > 1;
+  const multi = stopsOf(t).length > 1;
   const who = t.who.length ? '<div class="d-who">' + t.who.map(w => '<span class="av-wrap"><span class="av" style="background:' + avColor(w) + '">' + esc(w.slice(0,1)) + '</span>' + esc(w) + '</span>').join('') + '</div>' : '';
-  const chips = multi ? '<div class="d-chips">' + t.places.map((p,k) => '<button class="d-chip" data-k="' + k + '">📍 ' + esc(p.name) + '</button>').join('') + '</div>' : '';
+  const chips = multi ? '<div class="d-chips">' + t.places.map((p,k) => '<button class="d-chip" data-k="' + k + '">' + (k + 1) + ' · ' + esc(p.name) + '</button>').join('') + '</div>' : '';
   const blocks = t.places.map(p => {
-    const hotel = p.hotel ? '<div class="d-hotel">🏨 ' + esc(p.hotel) + '</div>' : '', mem = p.memory ? '<p class="d-mem">' + esc(p.memory) + '</p>' : '';
+    const hotel = p.hotel ? '<div class="d-hotel">住 · ' + esc(p.hotel) + '</div>' : '', mem = p.memory ? '<p class="d-mem">' + esc(p.memory) + '</p>' : '';
     if (!hotel && !mem) return '';
     return '<div class="d-place">' + (multi ? '<div class="d-pname">' + esc(p.name) + '</div>' : '') + hotel + mem + '</div>';
   }).join('');
   box.style.setProperty('--tc', t.color); box.style.setProperty('--tcbg', rgba(t.rgb, .24));
   box.innerHTML =
-    '<div class="d-top"><span class="when">' + t.year + '年' + formatWhen(t) + '</span><div class="d-nav">' +
+    (S.fromCity && S.model.dotMap.get(S.fromCity) ? '<button class="d-back" data-act="backcity">← 回到' + esc(S.model.dotMap.get(S.fromCity).name) + '</button>' : '') +
+    '<div class="d-top"><span class="when">' + t.year + '年' + formatWhen(t) + (multi ? ' · ' + stopsOf(t).length + ' 站' : '') + '</span><div class="d-nav">' +
     '<button data-act="older" title="更早的一次" aria-label="更早的一次"' + (i >= trips.length - 1 ? ' disabled' : '') + '>‹</button>' +
     '<button data-act="newer" title="更近的一次" aria-label="更近的一次"' + (i <= 0 ? ' disabled' : '') + '>›</button>' +
     '<button data-act="close" title="关闭" aria-label="关闭">✕</button></div></div>' +
-    '<h3 class="d-title">' + esc(tripTitle(t)) + '</h3>' + who + chips + (blocks || '<p class="d-empty">这次的小故事还没写下来，等你补上 ✍️</p>');
+    '<h3 class="d-title">' + esc(tripTitle(t)) + '</h3>' + who + chips + (blocks || '<p class="d-empty">这次的小故事还没写下来，等你补上</p>');
+  box.hidden = false;
+}
+function renderCity(d){
+  const box = $('detail'), M = S.model;
+  const rows = d.trips.map(id => {
+    const t = M.tripMap.get(id), st = stopsOf(t), k = st.findIndex(q => q.key === d.key);
+    const ctx = st.length === 1 ? '单独去的' : '长行程 · 第' + (k + 1) + '站 / 共' + st.length + '站';
+    const route = st.length > 1 ? '<div class="c-route">' + st.map((q, i) => i === k ? '<b>' + esc(q.name) + '</b>' : esc(q.name)).join(' → ') + '</div>' : '';
+    const pl = t.places.find(q => q.key === d.key) || {};
+    const note = pl.memory || pl.hotel;
+    const who = t.who.length ? ' · ' + esc(t.who.join('、')) : '';
+    return '<button class="c-row" data-trip="' + esc(id) + '" style="--tc:' + t.color + ';--tcbg:' + rgba(t.rgb, .24) + '">' +
+      '<div class="c-top"><span class="c-when">' + t.year + '年' + formatWhen(t) + '</span><span class="c-ctx">' + ctx + '</span></div>' + route +
+      (who ? '<div class="c-route">同行' + who.slice(3) + '</div>' : '') + (note ? '<div class="c-note">' + esc(note) + '</div>' : '') + '</button>';
+  }).join('');
+  box.style.setProperty('--tc', d.color); box.style.setProperty('--tcbg', rgba(d.rgb, .24));
+  box.innerHTML = '<div class="d-top"><span class="when">去过 ' + d.trips.length + ' 次</span><div class="d-nav"><button data-act="close" title="关闭" aria-label="关闭">✕</button></div></div>' +
+    '<h3 class="d-title">' + esc(d.name) + '</h3><div class="d-sub">点一次旅行，看那次的完整内容</div><div class="c-list">' + rows + '</div>';
   box.hidden = false;
 }
 function renderTimeline(){
   const box = $('timeline'), trips = S.model.trips;
-  if (!trips.length) { box.innerHTML = '<div class="empty">这里还空空的，等第一段旅程来点亮 🌱</div>'; return; }
+  if (!trips.length) { box.innerHTML = '<div class="empty">这里还空空的，等第一段旅程来点亮</div>'; return; }
   let html = '', cur = null;
   trips.forEach(t => {
     if (t.year !== cur) { if (cur !== null) html += '</div>'; cur = t.year; html += '<h3 class="year">' + t.year + '</h3><div class="rail">'; }
@@ -592,7 +652,7 @@ function renderTimeline(){
     const mem = (t.places.find(p => p.memory) || {}).memory;
     const style = '--tc:' + t.color + ';--tcbg:' + rgba(t.rgb, .22) + ';--tcsh:' + rgba(t.rgb, .26);
     html += '<article class="trip' + (t.id === S.selected ? ' on' : '') + '" data-id="' + esc(t.id) + '" style="' + style + '" tabindex="0" role="button">' +
-      '<div class="trip-top"><span class="when">' + formatWhen(t) + '</span><h4>' + esc(tripTitle(t)) + '</h4><span class="chev">›</span></div>' + who +
+      '<div class="trip-top"><span class="when">' + formatWhen(t) + '</span><h4>' + esc(tripTitle(t)) + '</h4>' + (stopsOf(t).length > 1 ? '<span class="nstop">' + stopsOf(t).length + ' 站</span>' : '') + '<span class="chev">›</span></div>' + who +
       (mem ? '<p class="snip">' + esc(mem) + '</p>' : '') + '</article>';
   });
   box.innerHTML = html + '</div>';
@@ -650,6 +710,8 @@ function runAnim(){
     const el = now - a.t0; let dirty = false;
     while (a.next < a.steps.length && a.steps[a.next].time <= el) {
       const s = a.steps[a.next++]; a.lit.set(s.key, {t: a.t0 + s.time});
+      if (a.curTrip !== s.tripId) { a.curTrip = s.tripId; a.segs = []; a.prev = null; }
+      if (a.prev && a.prev !== s.key) a.segs.push([a.prev, s.key]); a.prev = s.key;
       if (!a.litTrips.has(s.tripId)) { a.litTrips.add(s.tripId); dirty = true; }
       const t = S.model.tripMap.get(s.tripId); $('yearTick').textContent = t.year + '年' + t.month + '月';
     }
@@ -674,7 +736,7 @@ function finishAnim(quiet){
 }
 function replay(total){
   finishAnim(true);
-  if (S.selected) { S.selected = null; $('caption').classList.remove('on'); renderDetail(null); document.querySelectorAll('.trip.on').forEach(e => e.classList.remove('on')); }
+  if (S.selected || S.city) { S.selected = null; S.city = null; S.fromCity = null; $('caption').classList.remove('on'); renderDetail(null); document.querySelectorAll('.trip.on').forEach(e => e.classList.remove('on')); }
   if (REDUCE || S.model.trips.length < 2) { render(); return; }
   prepareAnim(total);
   chart.setOption({geo:{regions: buildRegions(S.curCounts)}, series: buildSeries(performance.now())});
@@ -685,7 +747,7 @@ function replay(total){
 function setYear(y){
   if (y === S.year) return;
   finishAnim(true);
-  S.year = y; S.selected = null; S.model = buildModel(S.records, y); S.curCounts = S.model.regionCounts;
+  S.year = y; S.selected = null; S.city = null; S.fromCity = null; S.model = buildModel(S.records, y); S.curCounts = S.model.regionCounts;
   $('caption').classList.remove('on'); renderDetail(null); markHint();
   renderYears(); renderSummary(); renderTimeline();
   if (isDesktop()) $('panel').scrollTo({top:0});
@@ -711,7 +773,7 @@ function start(geo, data){
       formatter: p => {
         if (p.componentType !== 'geo') return '';
         const key = ALIAS[p.name] || p.name, set = S.curCounts.get(key);
-        if (!set || !set.size) return '<b>' + esc(key) + '</b><br><span style="color:#8C827A">还没去过，留给以后 ✨</span>';
+        if (!set || !set.size) return '<b>' + esc(key) + '</b><br><span style="color:#8C827A">还没去过，留给以后</span>';
         let latest = null; set.forEach(id => { const t = S.model.tripMap.get(id); if (t && (!latest || sortKeyOf(t) > sortKeyOf(latest))) latest = t; });
         return '<b>' + esc(key) + '</b> · 去过 ' + set.size + ' 次' + (latest ? '<br><span style="color:#8C827A">最近一次 ' + latest.year + '年' + latest.month + '月</span>' : '');
       }},
@@ -722,7 +784,9 @@ function start(geo, data){
 
   renderStats(); renderYears(); renderSummary(); renderTimeline(); renderLegend();
   if (data && data.updatedAt) { const d = new Date(data.updatedAt); if (!isNaN(d)) $('foot').textContent = '足迹最近更新于 ' + d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日'; }
-  setMsg(S.records.length ? '' : '还没有点亮的足迹，过些日子再来看看吧 ✨', true);
+  const bad = S.records.filter(r => !validCoord(r)).map(r => r.destination || r.cityName || '?');
+  if (bad.length) $('foot').textContent += (S.records.length ? ' · ' : '') + '有 ' + bad.length + ' 条记录坐标异常，已先跳过：' + [...new Set(bad)].join('、');
+  setMsg(S.records.length ? '' : '还没有点亮的足迹，过些日子再来看看吧', true);
   if (autoplay) runAnim(); else if (S.records.length) showHint();
 
   chart.on('click', p => {
@@ -735,9 +799,8 @@ function start(geo, data){
     }
     if (!p.data.key) return;
     const dot = S.model.dotMap.get(p.data.key); if (!dot) return;
-    const i = dot.trips.indexOf(S.selected);                 // 同一城市去过多次：连续点击依次切换
-    const id = i < 0 ? dot.trips[0] : (dot.trips.length > 1 ? dot.trips[(i + 1) % dot.trips.length] : S.selected);
-    selectTrip(id);
+    if (S.selected && S.model.tripMap.get(S.selected).places.some(q => q.key === dot.key)) return;   // 旅行模式下点本次的站，不切换
+    if (dot.trips.length > 1) selectCity(dot.key); else selectTrip(dot.trips[0]);
   });
   chart.on('georoam', () => {
     finishAnim(true); S.userMoved = true; cancelTween(); afterMove(); markHint();
@@ -750,19 +813,21 @@ function start(geo, data){
   $('timeline').addEventListener('click', e => { const el = e.target.closest('.trip'); if (el) selectTrip(el.dataset.id); });
   $('timeline').addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const el = e.target.closest('.trip'); if (el) { e.preventDefault(); selectTrip(el.dataset.id); } });
   $('detail').addEventListener('click', e => {
+    const row = e.target.closest('.c-row'); if (row) { selectTrip(row.dataset.trip, {fromCity: S.city}); return; }
     const chip = e.target.closest('.d-chip'); if (chip) { focusPlace(Number(chip.dataset.k)); return; }
     const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
     const trips = S.model.trips, i = trips.findIndex(t => t.id === S.selected);
-    if (b.dataset.act === 'close') selectTrip(S.selected);
+    if (b.dataset.act === 'close') clearFocus();
+    else if (b.dataset.act === 'backcity') selectCity(S.fromCity, true);
     else if (b.dataset.act === 'older' && trips[i+1]) selectTrip(trips[i+1].id);
     else if (b.dataset.act === 'newer' && trips[i-1]) selectTrip(trips[i-1].id);
   });
   $('years').addEventListener('click', e => { const b = e.target.closest('.yr'); if (b) setYear(b.dataset.y === 'all' ? 'all' : Number(b.dataset.y)); });
-  $('btnHome').addEventListener('click', () => { finishAnim(true); if (S.selected) selectTrip(S.selected); else fitAll(800); });
+  $('btnHome').addEventListener('click', () => { finishAnim(true); if (S.selected || S.city) clearFocus(); else fitAll(800); });
   $('btnReplay').addEventListener('click', () => replay(S.year === 'all' ? 5000 : 2200));
   $('skipPill').addEventListener('click', () => finishAnim());
-  $('backPill').addEventListener('click', () => { if (S.selected) { const t = S.model.tripMap.get(S.selected); flyTo(fitTo(t.places.map(p => [p.lng, p.lat]), {minLng:5, minLat:4}), 700); } else fitAll(700); });
-  $('captionClose').addEventListener('click', () => selectTrip(S.selected));
+  $('backPill').addEventListener('click', () => { if (S.city) { const d = S.model.dotMap.get(S.city); flyTo(fitTo([[d.lng, d.lat]], {minLng:10, minLat:8}), 700); } else if (S.selected) { const t = S.model.tripMap.get(S.selected); flyTo(fitTo(t.places.map(p => [p.lng, p.lat]), {minLng:5, minLat:4}), 700); } else fitAll(700); });
+  $('captionClose').addEventListener('click', clearFocus);
   $('btnIn').addEventListener('click', () => { finishAnim(true); zoomBy(1.6); });
   $('btnOut').addEventListener('click', () => { finishAnim(true); zoomBy(1 / 1.6); });
   $('legendBtn').addEventListener('click', () => { const pop = $('legendPop'); pop.hidden = !pop.hidden; $('legendBtn').setAttribute('aria-expanded', String(!pop.hidden)); });
@@ -770,8 +835,8 @@ function start(geo, data){
   const onResize = () => {
     chart.resize();
     if (!S.userMoved && !S.tween) {
-      const pts = S.selected ? S.model.tripMap.get(S.selected).places.map(p => [p.lng, p.lat]) : allPoints();
-      const f = fitTo(pts, S.selected ? {minLng:5, minLat:4} : undefined); setView(f.center, f.zoom); afterMove();
+      const cd = S.city && S.model.dotMap.get(S.city), pts = S.selected ? S.model.tripMap.get(S.selected).places.map(p => [p.lng, p.lat]) : cd ? [[cd.lng, cd.lat]] : allPoints();
+      const f = fitTo(pts, S.selected ? {minLng:5, minLat:4} : cd ? {minLng:10, minLat:8} : undefined); setView(f.center, f.zoom); afterMove();
     }
     render();
   };
@@ -783,11 +848,11 @@ function fontReady(){
   return Promise.race([document.fonts.load('18px "KuaiLe"', '我们的家庭旅行足迹'), new Promise(r => setTimeout(r, 2200))]).catch(() => {});
 }
 function bootstrap(){
-  if (!window.echarts) { setMsg('地图组件没有加载出来，刷新页面再试一次吧 🙏'); return; }
+  if (!window.echarts) { setMsg('地图组件没有加载出来，刷新页面再试一次吧'); return; }
   const j = u => fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
   Promise.all([j('./src/data/asia.geo.json'), j('./src/data/footprints.json?v=' + Date.now()).catch(() => null), fontReady()])
-    .then(([geo, data]) => { start(geo, data || {records: []}); if (!data) setMsg('足迹数据暂时没有加载出来，刷新页面再试一次吧 🙏', true); })
-    .catch(() => setMsg('地图数据没有加载出来，刷新页面再试一次吧 🙏'));
+    .then(([geo, data]) => { start(geo, data || {records: []}); if (!data) setMsg('足迹数据暂时没有加载出来，刷新页面再试一次吧', true); })
+    .catch(() => setMsg('地图数据没有加载出来，刷新页面再试一次吧'));
 }
 bootstrap();
 })();
