@@ -263,6 +263,14 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
   .map-card.collapsed .map-mini{display:flex}
   .map-card.collapsed .map-tools,.map-card.collapsed .map-bottom,.map-card.collapsed .map-caption,.map-card.collapsed .map-hint,.map-card.collapsed .pill,.map-card.collapsed .year-tick,.map-card.collapsed .map-msg{display:none!important}
 }
+/* ---------- 全屏飞机开场 ---------- */
+body.cine-lock{overflow:hidden}
+.map-card.cine{position:fixed;left:0;right:0;top:0;bottom:0;width:100%;height:100vh;height:100dvh;max-width:none;min-height:0;margin:0;border-radius:0;z-index:1000;box-shadow:none}
+.map-card.cine #map{height:100%}
+.map-card.cine .map-tools,.map-card.cine .map-bottom,.map-card.cine .map-hint,.map-card.cine .map-caption,.map-card.cine .pill.back{display:none!important}
+.cine-title{position:absolute;left:0;right:0;top:38%;z-index:9;text-align:center;font-family:var(--kl);font-size:clamp(28px,6vw,52px);color:#5A4036;
+  text-shadow:0 2px 0 #FFF8EE,0 0 18px #FFF8EE;opacity:0;pointer-events:none;transition:opacity .7s ease}
+.cine-title.on{opacity:1}
 /* ---------- 顺路 ---------- */
 .trip.pass{padding:7px 12px;margin-bottom:7px;border-radius:14px;background:rgba(255,253,248,.7)}
 .trip.pass h4{font-size:15px;color:#8C7B6B}
@@ -303,6 +311,7 @@ h1 .mark{background:linear-gradient(transparent 58%,rgba(244,185,106,.6) 58%);pa
       </div>
       <div class="map-hint off" id="hint">点一点光点，看看那次旅行</div>
       <div class="year-tick" id="yearTick"></div>
+      <div class="cine-title" id="cineTitle">我们的家庭旅行足迹</div>
       <button class="pill" id="skipPill">跳过动画 ⏭</button>
       <button class="pill back" id="backPill">回到足迹</button>
       <div class="map-bottom">
@@ -560,9 +569,16 @@ function buildSeries(now){
   } else if (S.anim && S.anim.segs) {
     S.anim.segs.forEach(sg => { const A = S.model.dotMap.get(sg[0]), B = S.model.dotMap.get(sg[1]); if (A && B) lines.push({coords:[[A.lng, A.lat], [B.lng, B.lat]]}); });
   }
+  const an = S.anim, trails = an && an.trails ? an.trails : [], pl = an && an.plane;
   const label = size => ({show:true, formatter:'{b}', position:'right', distance:8, color:C.ink, fontSize:size, fontFamily:FONT, textBorderColor:'#FFF8EE', textBorderWidth:3});
   const off = {show:false};
+  const planeSize = (chart.getWidth() < 600 ? 24 : 32) * (pl ? pl.scale : 1);
   return [
+    {id:'trail', type:'lines', coordinateSystem:'geo', silent:true, zlevel:3, polyline:true, lineStyle:{curveness:0},
+     data: trails.map(t => ({coords:t.coords, lineStyle:{color:t.color, width:t.hop ? 2 : 3.5, type:t.hop ? 'dashed' : 'solid', opacity:t.hop ? .5 : .85}}))},
+    {id:'plane', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:6, symbol:PLANE, tooltip:{show:false},
+     data: pl ? [{value:pl.pos, symbolSize:planeSize, symbolRotate:pl.rot}] : [],
+     itemStyle:{color:'#E4573D', borderColor:'#FFFDF8', borderWidth:1.5, shadowBlur:10, shadowColor:'rgba(90,40,10,.45)'}},
     {id:'lines', type:'lines', coordinateSystem:'geo', silent:true, zlevel:1, data:lines, symbol:['none','arrow'], symbolSize:8, lineStyle:{color:C.ink, width:2, type:'dashed', opacity:.6, curveness:.25}},
     {id:'ghost', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:1, data:ghost, symbolSize:7, itemStyle:{color:C.ghost, opacity:.55, borderColor:'#FFFDF8', borderWidth:1.5}},
     {id:'rings', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:2, data:rings, symbol:'circle'},
@@ -577,6 +593,8 @@ function buildSeries(now){
     {id:'selNames', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:4, data: multi ? hi : [], symbolSize:1, tooltip:off, itemStyle:{color:'rgba(0,0,0,0)', borderWidth:0}, label:Object.assign(label(15), {distance:17}), labelLayout:{hideOverlap:false}}
   ];
 }
+const PLANE_SIGN = -1;
+const PLANE = 'path://M12 1 L14 8 L23 14 L23 16.5 L14 13.5 L13.6 19.5 L16.5 21.5 L16.5 23 L12 21.8 L7.5 23 L7.5 21.5 L10.4 19.5 L10 13.5 L1 16.5 L1 14 L10 8 Z';
 let renderTimer = 0, lastRender = 0;
 function render(){ if (!chart) return; chart.setOption({series: buildSeries(performance.now())}); lastRender = performance.now(); S.clusterZoom = curView().zoom; }
 function renderSoon(){
@@ -590,7 +608,7 @@ function setView(center, zoom){ chart.setOption({geo:{center, zoom}}); }
 function fitTo(points, opt){
   opt = opt || {};
   const narrow = chart.getWidth() < 600;
-  const padL = .12, padR = narrow ? .40 : .24, resBottom = 78, resTop = 58;
+  const padL = opt.free ? .16 : .12, padR = opt.free ? .16 : narrow ? .40 : .24, resBottom = opt.free ? 40 : 78, resTop = opt.free ? 40 : 58;
   const minLng = opt.minLng || 6, minLat = opt.minLat || 5;
   const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
   const x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
@@ -827,40 +845,102 @@ function renderStats(){
 }
 function setMsg(text, over){ const m = $('mapMsg'); if (text) { m.textContent = text; m.className = 'map-msg' + (over ? ' over' : ''); } else m.className = 'map-msg off'; }
 
-/* ============ 点亮动画：从最早的一次开始，一个一个亮起来，地区颜色也越来越深 ============ */
+/* ============ 开场动画：全屏，一架小飞机按时间顺序飞过每一站，镜头跟着走 ============ */
+const HOME = {lng:114.17, lat:22.32};                               // 动画起点：香港
+const ease = t => t * t * (3 - 2 * t);
+function legCtrl(A, B){
+  const dx = B[0] - A[0], dy = B[1] - A[1];
+  let nx = -dy, ny = dx; if (ny < 0) { nx = -nx; ny = -ny; }       // 弧线往北凸
+  const k = Math.hypot(dx, dy) < .8 ? 0 : .2;
+  return [(A[0] + B[0]) / 2 + nx * k, (A[1] + B[1]) / 2 + ny * k];
+}
+function bezAt(A, C, B, u){ const w = 1 - u; return [w*w*A[0] + 2*w*u*C[0] + u*u*B[0], w*w*A[1] + 2*w*u*C[1] + u*u*B[1]]; }
 function prepareAnim(total){
-  const trips = S.model.trips.slice().reverse(), steps = [];
-  trips.forEach(t => {
-    const seen = new Set();
-    t.places.forEach(p => { if (!seen.has(p.key)) { seen.add(p.key); steps.push({tripId:t.id, key:p.key, last:false}); } });
-    if (steps.length) steps[steps.length - 1].last = true;
+  const trips = S.model.trips.slice().reverse(), legs = [];       // 从最早的一次开始
+  let prev = null;                                                // 飞机从 HOME 出发（不在地图上标出）
+  trips.forEach((t, ti) => {
+    const seen = new Set(), recent = ti >= trips.length - 3;
+    t.places.forEach(p => {
+      if (seen.has(p.key)) return; seen.add(p.key);
+      const to = S.model.dotMap.get(p.key); if (!to) return;
+      const from = prev ? (prev !== p.key ? S.model.dotMap.get(prev) : null) : HOME;
+      const d = from ? Math.hypot(to.lng - from.lng, to.lat - from.lat) : 0;
+      let dur = from && d > .05 ? clamp(450 + d * 55, 600, 1700) : 0, pause = recent ? 650 : 200;
+      if (p.pass) { dur *= .6; pause = 0; }                       // 顺路的地方：快速掠过
+      legs.push({key:p.key, trip:t.id, first:seen.size === 1, from, to, dur, pause, recent});
+      prev = p.key;
+    });
   });
-  const gap = clamp(total / (steps.length + trips.length * .6), 90, 420);
-  let tm = 0; steps.forEach(s => { s.time = tm; tm += s.last ? gap * 1.6 : gap; });
-  S.anim = {t0:0, steps, next:0, lit:new Map(), litTrips:new Set(), end:tm, raf:0};
+  let rs = 0, os = 0; legs.forEach(l => { if (l.recent) rs += l.dur + l.pause; else os += l.dur + l.pause; });
+  const m = os ? clamp((total - rs) / os, .2, 1) : 1;
+  let tm = 0;
+  legs.forEach(l => { if (!l.recent) { l.dur = l.dur ? Math.max(260, l.dur * m) : 0; l.pause *= m; } l.t0 = tm; l.tl = tm + l.dur; tm = l.tl + l.pause; });
+  S.anim = {legs, idx:0, lit:new Map(), litTrips:new Set(), trails:[], plane:null, end:tm, raf:0, cine:true, rot:0};
   S.curCounts = new Map();
   $('skipPill').classList.add('on'); $('yearTick').classList.add('on'); $('yearTick').textContent = '';
   $('backPill').classList.remove('on');
 }
+function camTarget(a, L){
+  const pts = L.from ? [[L.from.lng, L.from.lat], [L.to.lng, L.to.lat]] : [[L.to.lng, L.to.lat]];
+  const f = fitTo(pts, {free:true, minLng:L.from ? 14 : 22, minLat:L.from ? 10 : 15});
+  f.zoom = clamp(f.zoom, a.zAll, a.zAll * 3.2);
+  // 两个点都还在当前画面里、缩放也差不多：镜头不动，避免来回晃
+  const v = a.cam, r = f.zoom / v.zoom;
+  if (L.from && r > .7 && r < 1.5) {
+    const W = chart.getWidth(), H = chart.getHeight(), ok = q => { const px = chart.convertToPixel({geoIndex:0}, q); return px && px[0] > W * .12 && px[0] < W * .88 && px[1] > H * .18 && px[1] < H * .82; };
+    if (ok([L.from.lng, L.from.lat]) && ok([L.to.lng, L.to.lat])) return null;
+  }
+  return f;
+}
+function ensureLeg(L){
+  if (L.coords || !L.from) return;
+  L.A = [L.from.lng, L.from.lat]; L.B = [L.to.lng, L.to.lat]; L.C = legCtrl(L.A, L.B);
+  L.coords = []; for (let i = 0; i <= 24; i++) L.coords.push(bezAt(L.A, L.C, L.B, i / 24));
+}
 function runAnim(){
   const a = S.anim; if (!a) return;
-  a.t0 = performance.now() + 300;
+  setFold(false); window.scrollTo(0, 0);
+  document.body.classList.add('cine-lock'); $('mapCard').classList.add('cine'); chart.resize();
+  const all = fitTo(allPoints(), {free:true}); a.zAll = all.zoom; setView(all.center, all.zoom);
+  a.cam = {center:all.center.slice(), zoom:all.zoom}; a.target = null;
+  chart.setOption({geo:{regions: buildRegions(S.curCounts)}, series: buildSeries(performance.now())});
+  const ct = $('cineTitle'); ct.classList.add('on'); setTimeout(() => ct.classList.remove('on'), 1500);
+  const start = performance.now(); a.t0 = start + 1700; a.last = start;
   const loop = now => {
     if (S.anim !== a) return;
-    const el = now - a.t0; let dirty = false;
-    while (a.next < a.steps.length && a.steps[a.next].time <= el) {
-      const s = a.steps[a.next++]; a.lit.set(s.key, {t: a.t0 + s.time});
-      if (a.curTrip !== s.tripId) { a.curTrip = s.tripId; a.segs = []; a.prev = null; }
-      if (a.prev && a.prev !== s.key) a.segs.push([a.prev, s.key]); a.prev = s.key;
-      if (!a.litTrips.has(s.tripId)) { a.litTrips.add(s.tripId); dirty = true; }
-      const t = S.model.tripMap.get(s.tripId); $('yearTick').textContent = t.year + '年' + t.month + '月';
+    const el = now - a.t0, dt = Math.min(60, now - a.last); a.last = now;
+    let dirty = false, L = a.legs[a.idx];
+    while (L && el >= L.tl) {                                      // 降落：点亮
+      if (!a.lit.has(L.key)) a.lit.set(L.key, {t:a.t0 + L.tl});
+      if (!a.litTrips.has(L.trip)) { a.litTrips.add(L.trip); dirty = true; }
+      const t = S.model.tripMap.get(L.trip); $('yearTick').textContent = t.year + '年' + t.month + '月';
+      if (L.from && !L.first) { ensureLeg(L); a.trails.push({coords:L.coords, color:t.color, hop:false}); }
+      a.idx++; a.began = false; L = a.legs[a.idx];
     }
-    if (dirty) {
-      S.curCounts = regionCountsFor([...a.litTrips].map(id => S.model.tripMap.get(id)));
-      chart.setOption({geo:{regions: buildRegions(S.curCounts)}});
+    if (L && !a.began && el >= L.t0 && L.dur) {                    // 起飞
+      a.began = true; if (L.first) a.trails = []; ensureLeg(L);
     }
+    if (L && a.camIdx !== a.idx) { a.camIdx = a.idx; a.target = camTarget(a, L); }
+    if (!L) a.plane = null;
+    else if (L.dur && el >= L.t0) {                                // 飞行中
+      const u = ease(clamp((el - L.t0) / L.dur, 0, 1)), pos = bezAt(L.A, L.C, L.B, u);
+      const u2 = Math.min(1, u + .03), q0 = chart.convertToPixel({geoIndex:0}, bezAt(L.A, L.C, L.B, u > .97 ? .94 : u)), q1 = chart.convertToPixel({geoIndex:0}, bezAt(L.A, L.C, L.B, u > .97 ? 1 : u2));
+      if (q0 && q1 && (q1[0] !== q0[0] || q1[1] !== q0[1])) a.rot = Math.atan2(q1[0] - q0[0], -(q1[1] - q0[1])) * 180 / Math.PI * PLANE_SIGN;
+      a.plane = {pos, rot:a.rot, scale:1 + .35 * Math.sin(Math.PI * u)};
+      const part = L.coords.slice(0, Math.max(2, Math.round(u * 24) + 1)); part[part.length - 1] = pos;
+      a.partial = {coords:part, color:S.model.tripMap.get(L.trip).color, hop:L.first};
+    } else {                                                       // 停在上一站
+      const pk = a.idx > 0 ? a.legs[a.idx - 1] : L, pt = a.idx > 0 ? S.model.dotMap.get(pk.key) : (L.from || S.model.dotMap.get(L.key));
+      a.plane = {pos:[pt.lng, pt.lat], rot:a.rot, scale:1}; a.partial = null;
+    }
+    if (a.target) { const k = 1 - Math.exp(-dt / 420), c = a.cam, g = a.target;
+      c.center = [c.center[0] + (g.center[0] - c.center[0]) * k, c.center[1] + (g.center[1] - c.center[1]) * k]; c.zoom = c.zoom * Math.pow(g.zoom / c.zoom, k); }
+    const saved = a.trails; if (a.partial) a.trails = saved.concat([a.partial]);
+    if (dirty) { S.curCounts = regionCountsFor([...a.litTrips].map(id => S.model.tripMap.get(id))); chart.setOption({geo:{regions: buildRegions(S.curCounts)}}); }
+    chart.setOption({geo:{center:a.cam.center, zoom:a.cam.zoom}});
     chart.setOption({series: buildSeries(now)});
-    if (el > a.end + 700) { finishAnim(); return; }
+    a.trails = saved;
+    if (el > a.end + 900) { finishAnim(); return; }
     a.raf = requestAnimationFrame(loop);
   };
   a.raf = requestAnimationFrame(loop);
@@ -869,8 +949,10 @@ function finishAnim(quiet){
   const a = S.anim; if (!a) return;
   cancelAnimationFrame(a.raf); S.anim = null;
   S.curCounts = S.model.regionCounts;
-  $('skipPill').classList.remove('on'); $('yearTick').classList.remove('on');
+  $('skipPill').classList.remove('on'); $('yearTick').classList.remove('on'); $('cineTitle').classList.remove('on');
+  if (a.cine) { document.body.classList.remove('cine-lock'); $('mapCard').classList.remove('cine'); chart.resize(); S.userMoved = false; }
   chart.setOption({geo:{regions: buildRegions(S.curCounts)}, series: buildSeries(performance.now())});
+  if (a.cine) fitAll(quiet ? 0 : 900);
   afterMove(); updateBackPill();
   if (!quiet) showHint();
 }
@@ -878,9 +960,7 @@ function replay(total){
   finishAnim(true);
   if (S.selected || S.city) { S.selected = null; S.city = null; S.fromCity = null; $('caption').classList.remove('on'); renderDetail(null); document.querySelectorAll('.trip.on').forEach(e => e.classList.remove('on')); }
   if (REDUCE || S.model.trips.length < 2) { render(); return; }
-  prepareAnim(total);
-  chart.setOption({geo:{regions: buildRegions(S.curCounts)}, series: buildSeries(performance.now())});
-  fitAll(700); runAnim();
+  prepareAnim(total); runAnim();
 }
 
 /* ============ 切换年份 ============ */
@@ -1036,7 +1116,7 @@ function start(geo, data){
   const fp = S.records.length + '|' + S.records.reduce((m, r) => Math.max(m, Number(r.year) * 100 + Number(r.month)), 0) + '|' + ((data && data.updatedAt) ? '' : 'x');
   const fresh = lsGet('fp_seen') !== fp; lsSet('fp_seen', fp);
   const autoplay = !REDUCE && S.model.trips.length >= 2 && fresh;
-  if (autoplay) prepareAnim(6500);
+  if (autoplay) prepareAnim(28000);
 
   chart.setOption({
     animation:false, backgroundColor:'transparent',
@@ -1099,7 +1179,7 @@ function start(geo, data){
   });
   $('years').addEventListener('click', e => { const b = e.target.closest('.yr'); if (b) setYear(b.dataset.y === 'all' ? 'all' : Number(b.dataset.y)); });
   $('btnHome').addEventListener('click', () => { finishAnim(true); if (S.selected || S.city) clearFocus(); else fitAll(800); });
-  $('btnReplay').addEventListener('click', () => replay(S.year === 'all' ? 5000 : 2200));
+  $('btnReplay').addEventListener('click', () => replay(S.year === 'all' ? 28000 : 12000));
   $('skipPill').addEventListener('click', () => finishAnim());
   $('backPill').addEventListener('click', () => { if (S.city) { const d = S.model.dotMap.get(S.city); flyTo(fitTo([[d.lng, d.lat]], {minLng:10, minLat:8}), 700); } else if (S.selected) { const t = S.model.tripMap.get(S.selected); flyTo(fitTo(t.places.map(p => [p.lng, p.lat]), {minLng:5, minLat:4}), 700); } else fitAll(700); });
   $('captionClose').addEventListener('click', clearFocus);
