@@ -484,6 +484,7 @@ function updateLOD(){
   if (want === !!S.lod && wl === !!S.cityLabels) return;
   S.lod = want; S.cityLabels = wl;
   chart.setOption({geo:{map: want ? 'asiaX' : 'asia', labelLayout:{hideOverlap: want}, regions: buildRegions(S.curCounts)}});
+  if (!S.anim) chart.setOption({series: buildSeries(performance.now())});
 }
 const regionLevel = n => n >= 7 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : n >= 1 ? 1 : 0;
 function regionCountsFor(trips){
@@ -558,12 +559,13 @@ function buildRegions(counts){
     if (ci) {
       const n = counts.has(ci.key) ? counts.get(ci.key).size : 0, lv = cityLevel(n);
       let fill = lv ? CITY_FILL[lv] : C.land;
-      if (lv && S.model.cityPass && S.model.cityPass.has(ci.key)) fill = mixHex(fill, C.land, .5);   // 顺路：淡一些
+      const isBase = BASE_KEYS.has(ci.key); if (isBase) fill = BASE_FILL;   // 大本营：固定底色，不看去过几次
+      if (!isBase && lv && S.model.cityPass && S.model.cityPass.has(ci.key)) fill = mixHex(fill, C.land, .5);   // 顺路：淡一些
       // 去过的市已经有光点的名字，色块里不重复画名字
       return {
         name,
-        itemStyle: BASE_KEYS.has(ci.key) ? {areaColor: fill, borderColor: '#C8553D', borderWidth: 2.4} : {areaColor: fill, borderColor: lv ? '#FFFFFF' : '#FFF8EE', borderWidth: lv ? 1.2 : .9},
-        label: {show: lv === 0 && !!S.cityLabels && (ci.bbox[1] - ci.bbox[0]) * (ci.bbox[3] - ci.bbox[2]) > .8, formatter:ci.short, color: lv ? '#5A3410' : '#B3A797', fontSize: lv ? 13 : 10, fontFamily: FONT, fontWeight: lv ? 'bold' : 'normal'},
+        itemStyle: {areaColor: fill, borderColor: lv ? '#FFFFFF' : '#FFF8EE', borderWidth: lv ? 1.2 : .9},
+        label: {show: !isBase && lv === 0 && !!S.cityLabels && (ci.bbox[1] - ci.bbox[0]) * (ci.bbox[3] - ci.bbox[2]) > .8, formatter:ci.short, color: lv ? '#5A3410' : '#B3A797', fontSize: lv ? 13 : 10, fontFamily: FONT, fontWeight: lv ? 'bold' : 'normal'},
         emphasis: {itemStyle: {areaColor: fill, borderColor: '#FFFFFF', borderWidth: 2, shadowBlur: 8, shadowColor: 'rgba(120,80,20,.28)'}, label: {color: lv ? '#5A3410' : '#6B5F55'}}
       };
     }
@@ -638,18 +640,18 @@ function buildSeries(now){
   const an = S.anim, trails = an && an.trails ? an.trails : [], pl = an && an.plane;
   const label = size => ({show:true, formatter:'{b}', position:'right', distance:8, color:C.ink, fontSize:size, fontFamily:FONT, textBorderColor:'#FFF8EE', textBorderWidth:3});
   const off = {show:false};
-  const baseData = an ? [] : BASES.map(b => ({name:b.name, value:[b.lng, b.lat], visited:S.model.dots.some(d => d.ck === b.ck)}));   // 开场动画时先不显示
+  const baseData = an || !S.lod ? [] : BASES.map(b => ({name:b.name, value:[b.lng, b.lat]}));   // 只在展开到市级时显示；开场动画时不显示
   const planeSize = (chart.getWidth() < 600 ? 24 : 32) * (pl ? pl.scale : 1);
   return [
     {id:'trail', type:'lines', coordinateSystem:'geo', silent:true, zlevel:3, polyline:true, lineStyle:{curveness:0},
      data: trails.map(t => ({coords:t.coords, lineStyle:{color:t.color, width:t.hop ? 2 : 3.5, type:t.hop ? 'dashed' : 'solid', opacity:t.hop ? .5 : .85}}))},
-    {id:'bases', type:'scatter', coordinateSystem:'geo', zlevel:5, symbol:'circle', symbolSize:28, symbolOffset:[0, -13], data:baseData,
+    {id:'bases', type:'scatter', coordinateSystem:'geo', zlevel:4, symbol:'circle', symbolSize:30, symbolOffset:[11, -13], data:baseData,
      tooltip:{formatter:p => '<b>' + esc(p.name) + '</b> · 大本营'},
      itemStyle:{color:'rgba(0,0,0,0)', borderWidth:0},
-     label:{show:true, position:'inside', formatter:"🏠", fontSize:26, textBorderWidth:0, color:'#4E443D'}},
-    {id:'baseNames', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:5, symbol:'circle', symbolSize:1, itemStyle:{color:'rgba(0,0,0,0)'}, tooltip:{show:false},
-     data:baseData.filter(d => !d.visited),
-     label:{show:true, position:'bottom', distance:3, formatter:p => p.name, color:'#8A4A2B', fontSize:13, fontFamily:FONT, textBorderColor:'#FFF8EE', textBorderWidth:3}},
+     label:{show:true, position:'inside', formatter:'🏠', fontSize:26, textBorderWidth:0, color:'#4E443D'}},
+    {id:'baseNames', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:4, symbol:'circle', symbolSize:1, symbolOffset:[11, -32], itemStyle:{color:'rgba(0,0,0,0)'}, tooltip:{show:false},
+     data:baseData,
+     label:{show:true, position:'top', distance:0, formatter:p => p.name, color:'#8A4A2B', fontSize:13, fontFamily:FONT, textBorderColor:'#FFF8EE', textBorderWidth:3}},
     {id:'plane', type:'scatter', coordinateSystem:'geo', silent:true, zlevel:6, symbol:PLANE, tooltip:{show:false},
      data: pl ? [{value:pl.pos, symbolSize:planeSize, symbolRotate:pl.rot}] : [],
      itemStyle:{color:'#E4573D', borderColor:'#FFFDF8', borderWidth:1.5, shadowBlur:10, shadowColor:'rgba(90,40,10,.45)'}},
@@ -923,6 +925,7 @@ function setMsg(text, over){ const m = $('mapMsg'); if (text) { m.textContent = 
 /* ============ 开场动画：全屏，一架小飞机按时间顺序飞过每一站，镜头跟着走 ============ */
 const BASES = [{name:'深圳', lng:114.06, lat:22.54, ck:'广东|深圳'}, {name:'遵义', lng:106.93, lat:27.73, ck:'贵州|遵义'}];   // 大本营：只标志，不算去过；要改就改这里
 const BASE_KEYS = new Set(BASES.map(b => b.ck));
+const BASE_FILL = '#F4C9BD';                      // 大本营在市级里的底色：暖粉
 const HOME = {lng:114.17, lat:22.32};                               // 动画起点：香港
 const ease = t => t * t * (3 - 2 * t);
 function legCtrl(A, B){
@@ -1204,6 +1207,7 @@ function start(geo, data, cities){
       formatter: p => {
         if (p.componentType !== 'geo') return '';
         const ci = S.lod && S.cityByName ? S.cityByName.get(p.name) : null;
+        if (ci && BASE_KEYS.has(ci.key)) return '<b>' + esc(ci.short) + '</b> · 大本营';
         if (ci) {
           const cs = S.curCounts.get(ci.key);
           if (!cs || !cs.size) return '<b>' + esc(ci.short) + '</b><br><span style="color:#8C827A">还没去过，留给以后</span>';
