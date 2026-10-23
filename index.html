@@ -363,6 +363,10 @@ const FONT = '"KuaiLe","Yuanti SC","PingFang SC","Microsoft YaHei",sans-serif';
 const C = {ink:'#4E443D', land:'#ECE5D8', foreign:'#EFE9DD', border:'#FFF8EE', ghost:'#BFB3A3'};
 const LEVEL_FILL = [null, '#FBE3B0', '#F7C97C', '#F0A94E', '#E48A33'];
 const LEVEL_NAMES = ['', '1次', '2–3次', '4–6次', '7次+'];
+const CITY_FILL = [null, LEVEL_FILL[1], LEVEL_FILL[2], LEVEL_FILL[4]];   // 市级三档：1 / 2–3 / 4+
+const cityLevel = n => n >= 4 ? 3 : n >= 2 ? 2 : n >= 1 ? 1 : 0;
+const mixHex = (a, b, k) => { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16), m = (s, i) => Math.round(((pa >> s) & 255) * (1 - k) + ((pb >> s) & 255) * k);
+  return '#' + [16, 8, 0].map(s => m(s).toString(16).padStart(2, '0')).join(''); };
 const ALIAS = {'香港':'广东', '澳门':'广东'};          // 香港、澳门算在广东里
 const REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = id => document.getElementById(id);
@@ -435,10 +439,57 @@ function regionOfPoint(x, y){
   for (const f of S.feat) for (const p of f.polys) for (const v of p[0]) { const d = Math.hypot(v[0] - x, v[1] - y); if (d < bd) { bd = d; best = f.name; } }
   return best ? (ALIAS[best] || best) : null;
 }
+/* ---- 市级：放大后，去过的省会展开成地级市 ---- */
+function indexCities(cities){
+  S.cities = cities; S.cityByName = new Map(); S.cityOfProv = new Map(); S.cityProvs = new Set();
+  const add = (name, short, prov, polys, bbox, first) => {
+    const key = prov + '|' + short, f = {name, short, prov, key, polys, bbox};
+    S.cityByName.set(name, f); S.cityProvs.add(prov);
+    if (!S.cityOfProv.has(prov)) S.cityOfProv.set(prov, []); S.cityOfProv.get(prov)[first ? 'unshift' : 'push'](f);
+  };
+  cities.features.forEach(f => {
+    const g = f.geometry, polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    polys.forEach(p => p[0].forEach(pt => { if (pt[0] < x0) x0 = pt[0]; if (pt[0] > x1) x1 = pt[0]; if (pt[1] < y0) y0 = pt[1]; if (pt[1] > y1) y1 = pt[1]; }));
+    add(f.properties.name, f.properties.short, f.properties.prov, polys, [x0, x1, y0, y1]);
+  });
+  ['香港', '澳门'].forEach(n => { const f = S.feat.find(q => q.name === n); if (f) add(n, n, '广东', f.polys, f.bbox, true); });   // 港澳排在最前，先判断
+}
+function cityOfPoint(x, y, prov){
+  const list = S.cityOfProv && S.cityOfProv.get(prov); if (!list) return null;
+  for (const f of list) {
+    const b = f.bbox; if (x < b[0] || x > b[1] || y < b[2] || y > b[3]) continue;
+    for (const p of f.polys) if (polyHas(x, y, p)) return f.key;
+  }
+  let best = null, bd = 1.5;                                 // 海岛等落在“海里”的点：取同省 1.5 度内最近的市
+  for (const f of list) for (const p of f.polys) for (const v of p[0]) { const d = Math.hypot(v[0] - x, v[1] - y); if (d < bd) { bd = d; best = f.key; } }
+  return best;
+}
+function buildMixed(){
+  S.mixed = null; S.lod = false;
+  if (!S.cities) return;
+  S.exProvs = new Set(S.all.dots.map(d => d.region).filter(r => S.cityProvs.has(r)));
+  if (!S.exProvs.size) return;
+  const feats = S.geo.features.filter(f => !S.exProvs.has(f.properties.name))
+    .concat(S.cities.features.filter(f => S.exProvs.has(f.properties.prov)).map(f => ({type:'Feature', properties:Object.assign({kind:'city'}, f.properties), geometry:f.geometry})));
+  S.mixed = {type:'FeatureCollection', features:feats};
+  echarts.registerMap('asiaX', S.mixed);
+}
+function updateLOD(){
+  if (!S.mixed || !chart) return;
+  const W = chart.getWidth(), H = chart.getHeight(), a = chart.convertFromPixel({geoIndex:0}, [0, H / 2]), b = chart.convertFromPixel({geoIndex:0}, [W, H / 2]);
+  if (!a || !b || !isFinite(a[0]) || !isFinite(b[0])) return;
+  const span = Math.abs(b[0] - a[0]), want = S.lod ? span < 34 : span < 28;   // 视野小于约 28 度经度时展开，回到 34 度以上再收起
+  const wl = S.cityLabels ? span < 15 : span < 12;                            // 放得更大，才显示没去过的市的名字
+  if (want === !!S.lod && wl === !!S.cityLabels) return;
+  S.lod = want; S.cityLabels = wl;
+  chart.setOption({geo:{map: want ? 'asiaX' : 'asia', labelLayout:{hideOverlap: want}, regions: buildRegions(S.curCounts)}});
+}
 const regionLevel = n => n >= 7 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : n >= 1 ? 1 : 0;
 function regionCountsFor(trips){
   const m = new Map();
-  trips.forEach(t => t.regions.forEach(r => { if (!m.has(r)) m.set(r, new Set()); m.get(r).add(t.id); }));
+  const put = (r, id) => { if (!m.has(r)) m.set(r, new Set()); m.get(r).add(id); };
+  trips.forEach(t => { t.regions.forEach(r => put(r, t.id)); if (t.cregions) t.cregions.forEach(r => put(r, t.id)); });
   return m;
 }
 
@@ -464,7 +515,7 @@ function buildHistory(){
 const ordinalOf = (tid, key) => (S.hist.visits.get(key) || []).indexOf(tid) + 1;
 function buildModel(records, year){
   const recs = records.filter(r => year === 'all' || Number(r.year) === year);
-  const tripMap = new Map(), dotMap = new Map(), years = new Set();
+  const tripMap = new Map(), dotMap = new Map(), years = new Set(), cityStat = new Map();
   recs.forEach((r, idx) => {
     if (!validCoord(r)) return;
     const lng = Number(r.lng), lat = Number(r.lat);
@@ -473,15 +524,17 @@ function buildModel(records, year){
     const key = clean(r.cityCode) || (lng + ',' + lat);
     const id = clean(r.tripId) || ('R' + idx);
     let t = tripMap.get(id);
-    if (!t) { t = {id, year:Number(r.year), month:Number(r.month), day:r.day ? Number(r.day) : null, places:[], who:[], regions:new Set()}; tripMap.set(id, t); }
+    if (!t) { t = {id, year:Number(r.year), month:Number(r.month), day:r.day ? Number(r.day) : null, places:[], who:[], regions:new Set(), cregions:new Set()}; tripMap.set(id, t); }
     const region = regionOfPoint(lng, lat);
     const pass = clean(r.tag) === '顺路';
-    t.places.push({name, city, lng, lat, key, region, pass, row:Number(r.row) || 0, hotel:clean(r.hotel), memory:clean(r.memory)});
+    const ck = region ? cityOfPoint(lng, lat, region) : null;
+    if (ck) { t.cregions.add(ck); const cs = cityStat.get(ck) || {np:0}; if (!pass) cs.np++; cityStat.set(ck, cs); }
+    t.places.push({name, city, lng, lat, key, region, ck, pass, row:Number(r.row) || 0, hotel:clean(r.hotel), memory:clean(r.memory)});
     if (region) t.regions.add(region);
     clean(r.companions).split(/[、,，;；\/\s]+/).filter(Boolean).forEach(w => { if (!t.who.includes(w)) t.who.push(w); });
     years.add(Number(r.year));
     let d = dotMap.get(key);
-    if (!d) { d = {key, name:city, lng, lat, region, passAll:true, trips:[]}; dotMap.set(key, d); }
+    if (!d) { d = {key, name:city, lng, lat, region, ck, passAll:true, trips:[]}; dotMap.set(key, d); }
     if (!pass) d.passAll = false;
     if (!d.trips.includes(id)) d.trips.push(id);
   });
@@ -493,14 +546,26 @@ function buildModel(records, year){
     const latest = tripMap.get(d.trips[0]);                 // 同一城市去过多次，按最近一次上色
     d.t = latest.t; d.rgb = latest.rgb; d.color = latest.color;
   });
-  return {trips, tripMap, dotMap, dots:[...dotMap.values()], dotKeys:new Set(dotMap.keys()), years:[...years].sort((a,b)=>a-b), regionCounts: regionCountsFor(trips)};
+  return {trips, tripMap, dotMap, dots:[...dotMap.values()], dotKeys:new Set(dotMap.keys()), years:[...years].sort((a,b)=>a-b), regionCounts: regionCountsFor(trips), cityPass: new Set([...cityStat].filter(e => e[1].np === 0).map(e => e[0]))};
 }
 
 /* ============ 地图：地区底色 ============ */
 function buildRegions(counts){
-  const prov = !!S.provinceLabels;
-  return S.geo.features.map(f => {
+  const prov = !!S.provinceLabels, feats = S.lod && S.mixed ? S.mixed.features : S.geo.features;
+  return feats.map(f => {
     const name = f.properties.name, isCountry = f.properties.kind === 'country';
+    const ci = S.lod && S.cityByName ? S.cityByName.get(name) : null;
+    if (ci) {
+      const n = counts.has(ci.key) ? counts.get(ci.key).size : 0, lv = cityLevel(n);
+      let fill = lv ? CITY_FILL[lv] : C.land;
+      if (lv && S.model.cityPass && S.model.cityPass.has(ci.key)) fill = mixHex(fill, C.land, .5);   // 顺路：淡一些
+      return {
+        name,
+        itemStyle: {areaColor: fill, borderColor: lv ? '#FFFFFF' : '#FFF8EE', borderWidth: lv ? 1.2 : .9},
+        label: {show: lv > 0 || (!!S.cityLabels && (ci.bbox[1] - ci.bbox[0]) * (ci.bbox[3] - ci.bbox[2]) > .8), formatter:ci.short, color: lv ? '#5A3410' : '#B3A797', fontSize: lv ? 13 : 10, fontFamily: FONT, fontWeight: lv ? 'bold' : 'normal'},
+        emphasis: {itemStyle: {areaColor: fill, borderColor: '#FFFFFF', borderWidth: 2, shadowBlur: 8, shadowColor: 'rgba(120,80,20,.28)'}, label: {color: lv ? '#5A3410' : '#6B5F55'}}
+      };
+    }
     const key = ALIAS[name] || name, n = counts.has(key) ? counts.get(key).size : 0, lv = regionLevel(n);
     const fill = lv ? LEVEL_FILL[lv] : (isCountry ? C.foreign : C.land);
     const show = !(name in ALIAS) && (lv > 0 || isCountry || prov);
@@ -596,7 +661,7 @@ function buildSeries(now){
 const PLANE_SIGN = -1;
 const PLANE = 'path://M12 1 L14 8 L23 14 L23 16.5 L14 13.5 L13.6 19.5 L16.5 21.5 L16.5 23 L12 21.8 L7.5 23 L7.5 21.5 L10.4 19.5 L10 13.5 L1 16.5 L1 14 L10 8 Z';
 let renderTimer = 0, lastRender = 0;
-function render(){ if (!chart) return; chart.setOption({series: buildSeries(performance.now())}); lastRender = performance.now(); S.clusterZoom = curView().zoom; }
+function render(){ if (!chart) return; updateLOD(); chart.setOption({series: buildSeries(performance.now())}); lastRender = performance.now(); S.clusterZoom = curView().zoom; }
 function renderSoon(){
   if (renderTimer) return;
   renderTimer = setTimeout(() => { renderTimer = 0; render(); }, Math.max(0, 90 - (performance.now() - lastRender)));
@@ -641,6 +706,7 @@ const fitAll = ms => flyTo(fitTo(allPoints()), ms);
 function zoomBy(f){ cancelTween(); const v = curView(); flyTo({center:v.center, zoom:clamp(v.zoom * f, 1, 60)}, 300, true); S.userMoved = true; }
 function afterMove(){
   const a = chart.convertToPixel({geoIndex:0}, [100, 20]), b = chart.convertToPixel({geoIndex:0}, [110, 20]);
+  updateLOD();
   const ppd = Math.abs(b[0] - a[0]) / 10 || 1, on = chart.getWidth() / ppd < 32;
   if (on !== S.provinceLabels) { S.provinceLabels = on; chart.setOption({geo:{regions: buildRegions(S.curCounts)}}); }
 }
@@ -839,7 +905,7 @@ function countUp(el, to){
 }
 function renderStats(){
   const a = S.all;
-  countUp($('stTrips'), a.trips.length); countUp($('stPlaces'), a.dots.length); countUp($('stRegions'), a.regionCounts.size);
+  countUp($('stTrips'), a.trips.length); countUp($('stPlaces'), a.dots.length); countUp($('stRegions'), [...a.regionCounts.keys()].filter(k => k.indexOf('|') < 0).length);
   const ys = a.years;
   countUp($('yearSpan'), ys.length ? ys[ys.length-1] - ys[0] + 1 : 0);
 }
@@ -937,7 +1003,7 @@ function runAnim(){
       c.center = [c.center[0] + (g.center[0] - c.center[0]) * k, c.center[1] + (g.center[1] - c.center[1]) * k]; c.zoom = c.zoom * Math.pow(g.zoom / c.zoom, k); }
     const saved = a.trails; if (a.partial) a.trails = saved.concat([a.partial]);
     if (dirty) { S.curCounts = regionCountsFor([...a.litTrips].map(id => S.model.tripMap.get(id))); chart.setOption({geo:{regions: buildRegions(S.curCounts)}}); }
-    chart.setOption({geo:{center:a.cam.center, zoom:a.cam.zoom}});
+    chart.setOption({geo:{center:a.cam.center, zoom:a.cam.zoom}}); updateLOD();
     chart.setOption({series: buildSeries(now)});
     a.trails = saved;
     if (el > a.end + 900) { finishAnim(); return; }
@@ -1105,12 +1171,14 @@ function setupMemlane(){
 }
 
 /* ============ 启动 ============ */
-function start(geo, data){
+function start(geo, data, cities){
   S.geo = geo; indexGeo(geo); echarts.registerMap('asia', geo);
+  if (cities) { try { indexCities(cities); } catch (e) { S.cities = null; S.cityOfProv = null; } }
   chart = echarts.init($('map'), null, {renderer:'canvas'});
   S.records = (data && data.records) || [];
   S.win = computeWindow(S.records);
   S.all = buildModel(S.records, 'all'); S.model = S.all; S.curCounts = S.model.regionCounts;
+  buildMixed();
   S.sheetUrl = (data && data.sheetUrl) || '';
   buildHistory();
   const fp = S.records.length + '|' + S.records.reduce((m, r) => Math.max(m, Number(r.year) * 100 + Number(r.month)), 0) + '|' + ((data && data.updatedAt) ? '' : 'x');
@@ -1124,6 +1192,13 @@ function start(geo, data){
       textStyle:{color:C.ink, fontFamily:FONT, fontSize:14}, extraCssText:'border-radius:12px;box-shadow:0 6px 18px rgba(120,95,60,.18);',
       formatter: p => {
         if (p.componentType !== 'geo') return '';
+        const ci = S.lod && S.cityByName ? S.cityByName.get(p.name) : null;
+        if (ci) {
+          const cs = S.curCounts.get(ci.key);
+          if (!cs || !cs.size) return '<b>' + esc(ci.short) + '</b><br><span style="color:#8C827A">还没去过，留给以后</span>';
+          let lt = null; cs.forEach(id => { const t = S.model.tripMap.get(id); if (t && (!lt || sortKeyOf(t) > sortKeyOf(lt))) lt = t; });
+          return '<b>' + esc(ci.short) + '</b> · 去过 ' + cs.size + ' 次' + (lt ? '<br><span style="color:#8C827A">最近一次 ' + lt.year + '年' + lt.month + '月</span>' : '');
+        }
         const key = ALIAS[p.name] || p.name, set = S.curCounts.get(key);
         if (!set || !set.size) return '<b>' + esc(key) + '</b><br><span style="color:#8C827A">还没去过，留给以后</span>';
         let latest = null; set.forEach(id => { const t = S.model.tripMap.get(id); if (t && (!latest || sortKeyOf(t) > sortKeyOf(latest))) latest = t; });
@@ -1145,6 +1220,14 @@ function start(geo, data){
   if (autoplay) runAnim(); else if (S.records.length) showHint();
 
   chart.on('click', p => {
+    if (p.componentType === 'geo') {                         // 点市的色块：进入这个城市
+      const ci = S.lod && S.cityByName ? S.cityByName.get(p.name) : null; if (!ci) return;
+      const ds = S.model.dots.filter(d => d.ck === ci.key).sort((a, b) => b.trips.length - a.trips.length); if (!ds.length) return;
+      finishAnim(true); markHint();
+      const dot = ds[0]; if (S.selected && S.model.tripMap.get(S.selected).places.some(q => q.key === dot.key)) return;
+      if (dot.trips.length > 1) selectCity(dot.key); else selectTrip(dot.trips[0]);
+      return;
+    }
     if (p.componentType !== 'series' || !p.data) return;
     chart.dispatchAction({type:'hideTip'});
     if (p.data.members) {                                    // 点气泡：飞过去放大，散开
@@ -1206,8 +1289,8 @@ function fontReady(){
 function bootstrap(){
   if (!window.echarts) { setMsg('地图组件没有加载出来，刷新页面再试一次吧'); return; }
   const j = u => fetch(u).then(r => { if (!r.ok) throw new Error(u + ' ' + r.status); return r.json(); });
-  Promise.all([j('./src/data/asia.geo.json'), j('./src/data/footprints.json?v=' + Date.now()).catch(() => null), fontReady()])
-    .then(([geo, data]) => { start(geo, data || {records: []}); if (!data) setMsg('足迹数据暂时没有加载出来，刷新页面再试一次吧', true); })
+  Promise.all([j('./src/data/asia.geo.json'), j('./src/data/footprints.json?v=' + Date.now()).catch(() => null), fontReady(), j('./src/data/cities.geo.json').catch(() => null)])
+    .then(([geo, data, _f, cities]) => { start(geo, data || {records: []}, cities); if (!data) setMsg('足迹数据暂时没有加载出来，刷新页面再试一次吧', true); })
     .catch(() => setMsg('地图数据没有加载出来，刷新页面再试一次吧'));
 }
 bootstrap();
